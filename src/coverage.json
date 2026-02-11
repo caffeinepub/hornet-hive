@@ -1,49 +1,52 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T04:23:30.286Z",
+  "generatedAt": "2026-02-11T14:28:28.269Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 2,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-32",
-        "summary": "Update `frontend/src/hooks/useQueries.ts` so the `useGetCallerUserProfile` bootstrap path reaches a terminal state even when the backend actor initialization stays `isFetching` indefinitely (e.g., actor creation hangs while calling `_initializeAccessControlWithSecret`). Specifically: start the existing actor-initialization timeout countdown when `actor` is null regardless of whether `actorFetching` is true or false, and after the timeout ensure the profile query runs and fails with a user-visible error instead of leaving the UI in a perpetual loading state.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ]
+        "id": "REQ-1",
+        "summary": "Enforce a one-like-per-student-per-comment rule in the backend so the same authenticated caller cannot successfully like the same comment more than once.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
-        "id": "REQ-33",
-        "summary": "Add a defensive bootstrap watchdog in `frontend/src/App.tsx` to prevent any remaining edge case from displaying an endless \"Loading...\" spinner for authenticated users. If the authenticated bootstrap state (`profileLoading || !isFetched`) persists beyond a fixed duration, render `BootstrapErrorScreen` with English messaging that indicates startup is taking too long, and provide working \"Try Again\" and \"Log Out\" actions using the same retry/logout behavior already used for the normal error state.",
+        "id": "REQ-2",
+        "summary": "Surface duplicate-like errors in the UI when liking a comment, showing an English user-facing message rather than failing silently.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/auth/BootstrapErrorScreen.tsx"
+          "frontend/src/components/feed/CommentsThread.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/auth/BootstrapErrorScreen.tsx"
+          "frontend/src/components/feed/CommentsThread.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/auth/BootstrapErrorScreen.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/feed/CommentsThread.tsx",
+    "frontend/src/components/feed/PostCard.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/polls/extractWeeklyTopics.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

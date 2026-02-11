@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Post } from '../../backend';
+import type { PostView } from '../../backend';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -13,7 +13,7 @@ import ReportAccountDialog from '../reporting/ReportAccountDialog';
 import DeletePostDialog from './DeletePostDialog';
 
 interface PostCardProps {
-  post: Post;
+  post: PostView;
 }
 
 export default function PostCard({ post }: PostCardProps) {

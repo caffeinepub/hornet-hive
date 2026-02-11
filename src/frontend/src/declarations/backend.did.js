@@ -30,15 +30,16 @@ export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'accountSuspendedUntil' : IDL.Opt(Time),
 });
-export const Comment = IDL.Record({
+export const CommentView = IDL.Record({
   'id' : IDL.Nat,
   'content' : IDL.Text,
   'authorId' : IDL.Principal,
   'authorName' : IDL.Text,
   'likes' : IDL.Nat,
   'timestamp' : Time,
+  'reported' : IDL.Bool,
 });
-export const Post = IDL.Record({
+export const PostView = IDL.Record({
   'id' : IDL.Nat,
   'content' : IDL.Text,
   'authorId' : IDL.Principal,
@@ -46,7 +47,7 @@ export const Post = IDL.Record({
   'likes' : IDL.Nat,
   'timestamp' : Time,
   'image' : IDL.Opt(ExternalBlob),
-  'comments' : IDL.Vec(Comment),
+  'comments' : IDL.Vec(CommentView),
   'reported' : IDL.Bool,
 });
 
@@ -85,7 +86,7 @@ export const idlService = IDL.Service({
   'deletePost' : IDL.Func([IDL.Nat], [], []),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getPosts' : IDL.Func([], [IDL.Vec(Post)], ['query']),
+  'getPosts' : IDL.Func([], [IDL.Vec(PostView)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -94,6 +95,7 @@ export const idlService = IDL.Service({
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'likeComment' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
   'likePost' : IDL.Func([IDL.Nat], [], []),
+  'reportComment' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
   'reportPost' : IDL.Func([IDL.Nat], [], []),
   'reportUser' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
@@ -125,15 +127,16 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'accountSuspendedUntil' : IDL.Opt(Time),
   });
-  const Comment = IDL.Record({
+  const CommentView = IDL.Record({
     'id' : IDL.Nat,
     'content' : IDL.Text,
     'authorId' : IDL.Principal,
     'authorName' : IDL.Text,
     'likes' : IDL.Nat,
     'timestamp' : Time,
+    'reported' : IDL.Bool,
   });
-  const Post = IDL.Record({
+  const PostView = IDL.Record({
     'id' : IDL.Nat,
     'content' : IDL.Text,
     'authorId' : IDL.Principal,
@@ -141,7 +144,7 @@ export const idlFactory = ({ IDL }) => {
     'likes' : IDL.Nat,
     'timestamp' : Time,
     'image' : IDL.Opt(ExternalBlob),
-    'comments' : IDL.Vec(Comment),
+    'comments' : IDL.Vec(CommentView),
     'reported' : IDL.Bool,
   });
   
@@ -180,7 +183,7 @@ export const idlFactory = ({ IDL }) => {
     'deletePost' : IDL.Func([IDL.Nat], [], []),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getPosts' : IDL.Func([], [IDL.Vec(Post)], ['query']),
+    'getPosts' : IDL.Func([], [IDL.Vec(PostView)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -189,6 +192,7 @@ export const idlFactory = ({ IDL }) => {
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'likeComment' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
     'likePost' : IDL.Func([IDL.Nat], [], []),
+    'reportComment' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
     'reportPost' : IDL.Func([IDL.Nat], [], []),
     'reportUser' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),

@@ -10,16 +10,17 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface Comment {
+export interface CommentView {
   'id' : bigint,
   'content' : string,
   'authorId' : Principal,
   'authorName' : string,
   'likes' : bigint,
   'timestamp' : Time,
+  'reported' : boolean,
 }
 export type ExternalBlob = Uint8Array;
-export interface Post {
+export interface PostView {
   'id' : bigint,
   'content' : string,
   'authorId' : Principal,
@@ -27,7 +28,7 @@ export interface Post {
   'likes' : bigint,
   'timestamp' : Time,
   'image' : [] | [ExternalBlob],
-  'comments' : Array<Comment>,
+  'comments' : Array<CommentView>,
   'reported' : boolean,
 }
 export type Time = bigint;
@@ -73,11 +74,12 @@ export interface _SERVICE {
   'deletePost' : ActorMethod<[bigint], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getPosts' : ActorMethod<[], Array<Post>>,
+  'getPosts' : ActorMethod<[], Array<PostView>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'likeComment' : ActorMethod<[bigint, bigint], undefined>,
   'likePost' : ActorMethod<[bigint], undefined>,
+  'reportComment' : ActorMethod<[bigint, bigint], undefined>,
   'reportPost' : ActorMethod<[bigint], undefined>,
   'reportUser' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,

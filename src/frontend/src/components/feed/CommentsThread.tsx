@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { Post } from '../../backend';
+import type { PostView } from '../../backend';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Heart, Send, Trash2 } from 'lucide-react';
+import { Heart, Send, Trash2, Flag } from 'lucide-react';
 import { formatTimestamp } from '../../utils/timeFormat';
 import { useAddComment, useLikeComment } from '../../hooks/useQueries';
 import { useSuspensionStatus } from '../../hooks/useSuspensionStatus';
@@ -12,16 +12,20 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatSuspensionEnd } from '../../utils/timeFormat';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import DeleteCommentDialog from './DeleteCommentDialog';
+import ReportCommentDialog from '../reporting/ReportCommentDialog';
+import { toast } from 'sonner';
 
 interface CommentsThreadProps {
-  post: Post;
+  post: PostView;
 }
 
 export default function CommentsThread({ post }: CommentsThreadProps) {
   const [commentText, setCommentText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<bigint | null>(null);
+  const [likingCommentId, setLikingCommentId] = useState<bigint | null>(null);
   
   const addCommentMutation = useAddComment();
   const likeCommentMutation = useLikeComment();
@@ -51,13 +55,31 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
     }
   };
 
-  const handleLikeComment = (commentId: bigint) => {
-    likeCommentMutation.mutate({ postId: post.id, commentId });
+  const handleLikeComment = async (commentId: bigint) => {
+    setLikingCommentId(commentId);
+    try {
+      await likeCommentMutation.mutateAsync({ postId: post.id, commentId });
+    } catch (err: any) {
+      // Map backend error to user-friendly message
+      const errorMessage = err.message || '';
+      if (errorMessage.includes('already liked') || errorMessage.includes('duplicate')) {
+        toast.error('You have already liked this comment.');
+      } else {
+        toast.error('Failed to like comment. Please try again.');
+      }
+    } finally {
+      setLikingCommentId(null);
+    }
   };
 
   const handleDeleteClick = (commentId: bigint) => {
     setSelectedCommentId(commentId);
     setDeleteDialogOpen(true);
+  };
+
+  const handleReportClick = (commentId: bigint) => {
+    setSelectedCommentId(commentId);
+    setReportDialogOpen(true);
   };
 
   const isCommentAuthor = (commentAuthorId: string): boolean => {
@@ -88,12 +110,12 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
                 size="sm"
                 className="gap-1 h-8"
                 onClick={() => handleLikeComment(comment.id)}
-                disabled={likeCommentMutation.isPending}
+                disabled={likingCommentId === comment.id}
               >
                 <Heart className="h-3 w-3" />
                 <span className="text-xs">{Number(comment.likes)}</span>
               </Button>
-              {isCommentAuthor(comment.authorId.toString()) && (
+              {isCommentAuthor(comment.authorId.toString()) ? (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -101,6 +123,15 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
                   onClick={() => handleDeleteClick(comment.id)}
                 >
                   <Trash2 className="h-3 w-3" />
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => handleReportClick(comment.id)}
+                >
+                  <Flag className="h-3 w-3" />
                 </Button>
               )}
             </div>
@@ -137,6 +168,16 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
         <DeleteCommentDialog
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
+          postId={post.id}
+          commentId={selectedCommentId}
+        />
+      )}
+
+      {/* Report Comment Dialog */}
+      {selectedCommentId !== null && (
+        <ReportCommentDialog
+          open={reportDialogOpen}
+          onOpenChange={setReportDialogOpen}
           postId={post.id}
           commentId={selectedCommentId}
         />

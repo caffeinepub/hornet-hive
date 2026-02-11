@@ -1,242 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
-  "summary": "Build a mobile social app named \"Hornet Hive\" for students in Eureka, Illinois: a safe, moderated group-chat-style feed with strict text/image appropriateness enforcement, reporting workflows, likes (no dislikes), and weekly topic polls.",
+  "projectStateVersion": 3,
+  "summary": "New project",
   "architectural_notes": [
-    "Target platform: mobile app distribution via Google Play (free).",
-    "Moderation pipeline required for both text (profanity/topic filtering) and images (nudity/skin/revealing attire detection) before allowing posts to publish.",
-    "Reporting system must support anonymous reporters, rapid takedown, and tracking unique reporters per account for 5-report threshold enforcement.",
-    "Suspension system: enforce time-based posting lockout (7 days) with automatic restoration."
+    "Enforce uniqueness for comment likes: (student_id, comment_id) must be unique to prevent multiple likes by the same student on the same comment."
   ],
-  "known_issues": [
-    "Production app still stuck on loading screen for user after publishing Version 5 (possible cache/actor/canister switch issue).",
-    "Loading screen issue persists in Version 6; user reports app still stuck loading despite retries.",
-    "After deploying Version 8, user sees \"Waiting for draft app...\" (possible deployment/build/preview issue preventing app from loading).",
-    "After deploying Version 9, app is still stuck (user reports still seeing stuck state, likely related to prior \"Waiting for draft app...\" deployment/preview issue)."
-  ],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-create-a-mobile-first-responsive-web-app-named-hornet-hive-with-a-consistent-kelly-green-white-and-black-design-system-buttons-typography-navigation-cards-states-applied-across-all-screens",
-      "title": "Create a mobile-first, responsive web app named \"Hornet Hive\" with a consistent Kelly-green, white, and black design system (buttons, typography, navigation, cards, states) applied across all screens.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-authentication-using-internet-identity-and-require-each-authenticated-user-to-set-a-unique-username-before-accessing-posting-features",
-      "title": "Implement authentication using Internet Identity and require each authenticated user to set a unique username before accessing posting features.",
+      "id": "feature-surface-duplicate-like-errors-in-the-ui-when-liking-a-comment-showing-an-english-user-facing-message-rather-than-failing-silently",
+      "title": "Surface duplicate-like errors in the UI when liking a comment, showing an English user-facing message rather than failing silently.",
       "reqIds": [
         "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-username-safety-validation-that-blocks-usernames-containing-profanity-or-other-disallowed-terms-and-prevent-saving-invalid-usernames-on-both-frontend-and-backend",
-      "title": "Add username safety validation that blocks usernames containing profanity or other disallowed terms, and prevent saving invalid usernames on both frontend and backend.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-group-chat-style-global-feed-where-students-can-create-posts-containing-text-and-optionally-an-image-each-post-must-record-author-username-author-principal-and-created-date-time",
-      "title": "Implement a group-chat-style global feed where students can create posts containing text and optionally an image; each post must record author username, author principal, and created date/time.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-comments-on-posts-with-each-comment-recording-author-username-author-principal-and-created-date-time-allow-likes-on-both-posts-and-comments-no-dislike-feature",
-      "title": "Implement comments on posts, with each comment recording author username, author principal, and created date/time; allow likes on both posts and comments (no dislike feature).",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-text-safety-moderation-for-posts-and-comments-block-content-that-contains-profanity-or-disallowed-terms-before-it-is-published-enforcing-the-rule-in-the-backend-with-matching-frontend-pre-check",
-      "title": "Add text safety moderation for posts and comments: block content that contains profanity or disallowed terms before it is published, enforcing the rule in the backend (with matching frontend pre-check).",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-image-posting-with-strict-safety-gating-1-enforce-file-type-and-size-limits-and-2-implement-a-moderation-pipeline-that-can-block-posting-of-images-flagged-as-not-school-appropriate-if-automated-image-analysis-cannot-be-performed-within-platform-constraints-the-pipeline-must-default-to-requires-review-behavior-and-keep-images-hidden-until-resolved-via-reporting-moderation-actions-defined-in-this-build",
-      "title": "Implement image posting with strict safety gating: (1) enforce file type and size limits, and (2) implement a moderation pipeline that can block posting of images flagged as not school-appropriate. If automated image analysis cannot be performed within platform constraints, the pipeline must default to \"requires review\" behavior and keep images hidden until resolved via reporting/moderation actions defined in this build.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-post-reporting-for-both-text-and-image-posts-any-student-can-report-a-post-once-reported-the-content-is-removed-from-public-view-as-soon-as-possible-and-the-author-receives-an-anonymous-notification-that-their-post-was-reported-reporter-identity-is-never-revealed",
-      "title": "Add post reporting for both text and image posts: any student can report a post; once reported, the content is removed from public view as soon as possible, and the author receives an anonymous notification that their post was reported (reporter identity is never revealed).",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-account-reporting-users-can-report-another-user-s-account-count-only-distinct-reporters-per-reported-account-when-an-account-reaches-5-distinct-reports-notify-the-reported-student-anonymously-and-apply-a-7-day-suspension-that-prevents-posting-and-commenting-until-the-suspension-expires-automatically",
-      "title": "Add account reporting: users can report another user's account; count only distinct reporters per reported account. When an account reaches 5 distinct reports, notify the reported student anonymously and apply a 7-day suspension that prevents posting and commenting until the suspension expires automatically.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-an-in-app-notifications-center-to-display-moderation-reporting-related-notices-e-g-post-reported-account-suspended-poll-available-with-notifications-stored-per-user-and-shown-in-reverse-chronological-order",
-      "title": "Implement an in-app notifications center to display moderation/reporting-related notices (e.g., post reported, account suspended, poll available), with notifications stored per user and shown in reverse chronological order.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-weekly-polls-each-friday-generate-a-poll-containing-the-top-ten-most-talked-about-topics-from-that-week-s-posts-comments-notify-students-that-voting-is-open-allow-voting-only-on-friday-show-results-starting-saturday-morning-disable-voting-on-saturday-and-later-delete-the-previous-poll-each-monday",
-      "title": "Implement weekly polls: each Friday, generate a poll containing the top ten most talked-about topics from that week’s posts/comments; notify students that voting is open; allow voting only on Friday; show results starting Saturday morning; disable voting on Saturday and later; delete the previous poll each Monday.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-provide-core-app-navigation-and-screens-feed-create-post-notifications-polls-view-vote-results-and-profile-view-set-username-view-suspension-status",
-      "title": "Provide core app navigation and screens: Feed, Create Post, Notifications, Polls (view/vote/results), and Profile (view/set username, view suspension status).",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-and-include-static-branding-assets-for-hornet-hive-logo-and-app-icon-and-render-them-in-the-ui-header-login-loading-manifest-areas-as-appropriate-from-frontend-public-assets-generated",
-      "title": "Generate and include static branding assets for Hornet Hive (logo and app icon) and render them in the UI (header/login/loading/manifest areas as appropriate) from frontend/public/assets/generated.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-inline-weekly-poll-panel-to-the-top-of-the-feed-page-so-students-can-view-and-interact-with-the-weekly-poll-directly-from-the-feed-without-navigating-to-the-polls-page-i-e-no-need-to-press-a-poll-poll-button-first-the-inline-panel-must-follow-the-same-weekly-time-window-rules-and-poll-data-behavior-currently-used-on-the-polls-page-create-poll-when-eligible-allow-voting-only-on-friday-show-results-starting-saturday-clear-old-poll-on-monday",
-      "title": "Add an inline weekly poll panel to the top of the Feed page so students can view and interact with the weekly poll directly from the Feed without navigating to the Polls page (i.e., no need to press a \"+poll\"/poll button first). The inline panel must follow the same weekly time-window rules and poll data behavior currently used on the Polls page (create poll when eligible, allow voting only on Friday, show results starting Saturday, clear old poll on Monday).",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-frontend-ui-flow-that-lets-a-signed-in-student-delete-their-own-post-from-the-feed-with-a-confirmation-dialog-and-automatic-feed-refresh",
-      "title": "Add a frontend UI flow that lets a signed-in student delete their own post from the feed, with a confirmation dialog and automatic feed refresh.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-in-app-share-hornet-hive-action-that-lets-a-signed-in-student-share-the-app-using-the-device-browser-system-share-sheet-when-available-web-share-api",
-      "title": "Add an in-app \"Share Hornet Hive\" action that lets a signed-in student share the app using the device/browser system share sheet when available (Web Share API).",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-provide-a-non-web-share-fallback-so-sharing-still-works-on-browsers-devices-that-do-not-support-the-web-share-api",
-      "title": "Provide a non-Web-Share fallback so sharing still works on browsers/devices that do not support the Web Share API.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-app-header-in-frontend-src-components-layout-appshell-tsx-to-display-a-share-button-in-the-top-right-corner-alongside-the-existing-notifications-button-the-share-button-must-trigger-the-existing-share-flow-web-share-api-with-clipboard-legacy-fallback-using-frontend-src-utils-sharehornethive-ts-and-must-provide-clear-user-feedback-e-g-success-toast-when-a-link-is-copied-no-error-toast-when-the-user-cancels-the-native-share-sheet",
-      "title": "Update the app header in `frontend/src/components/layout/AppShell.tsx` to display a Share button in the top-right corner alongside the existing Notifications button. The Share button must trigger the existing share flow (Web Share API with clipboard/legacy fallback) using `frontend/src/utils/shareHornetHive.ts`, and must provide clear user feedback (e.g., success toast when a link is copied; no error toast when the user cancels the native share sheet).",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-updated-hornet-hive-branding-assets-using-the-uploaded-mascot-image-hornet-logo-jpg-and-add-them-as-static-images-under-frontend-public-assets-generated",
-      "title": "Create updated Hornet Hive branding assets using the uploaded mascot image (Hornet_Logo.jpg) and add them as static images under frontend/public/assets/generated.",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-identify-and-eliminate-the-condition-that-causes-the-app-to-remain-stuck-on-the-global-loading-screen-after-version-6-deploy-by-ensuring-the-authenticated-startup-path-internet-identity-actor-creation-getcalleruserprofile-query-always-reaches-a-terminal-state-success-or-handled-error-and-never-remains-indefinitely-pending",
-      "title": "Identify and eliminate the condition that causes the app to remain stuck on the global \"Loading...\" screen after Version 6 deploy, by ensuring the authenticated startup path (Internet Identity -> actor creation -> getCallerUserProfile query) always reaches a terminal state (success or handled error) and never remains indefinitely pending.",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-authenticated-app-bootstrap-ui-in-frontend-src-app-tsx-to-handle-profile-fetch-failures-explicitly-react-query-error-state-and-provide-a-recovery-path-instead-of-showing-or-appearing-to-show-an-endless-loading-state-the-error-screen-must-use-english-user-facing-text-and-include-at-minimum-a-retry-action-and-a-log-out-action",
-      "title": "Update the authenticated app bootstrap UI in `frontend/src/App.tsx` to handle profile-fetch failures explicitly (React Query error state) and provide a recovery path instead of showing (or appearing to show) an endless loading state. The error screen must use English user-facing text and include at minimum: a \"Retry\" action and a \"Log out\" action.",
-      "reqIds": [
-        "REQ-24"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-frontend-profile-query-and-its-loading-gates-cannot-deadlock-due-to-actor-creation-initialization-problems-without-modifying-immutable-files-frontend-src-hooks-useactor-ts-and-frontend-src-hooks-useinternetidentity-ts-adjust-the-non-immutable-query-layer-frontend-src-hooks-usequeries-ts-and-or-frontend-src-app-tsx-gating-logic-so-the-ui-does-not-depend-on-a-state-that-can-remain-false-forever-e-g-isfetched-derived-from-actor-availability-and-so-that-errors-propagate-to-the-user-visible-error-state",
-      "title": "Ensure the frontend profile query and its loading gates cannot deadlock due to actor creation/initialization problems. Without modifying immutable files (`frontend/src/hooks/useActor.ts` and `frontend/src/hooks/useInternetIdentity.ts`), adjust the non-immutable query layer (`frontend/src/hooks/useQueries.ts`) and/or `frontend/src/App.tsx` gating logic so the UI does not depend on a state that can remain false forever (e.g., `isFetched` derived from actor availability) and so that errors propagate to the user-visible error state.",
-      "reqIds": [
-        "REQ-25"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-frontend-ui-flow-to-let-a-signed-in-student-delete-their-own-comments-from-the-feed-using-a-confirmation-dialog-and-automatic-feed-refresh-after-deletion",
-      "title": "Add a frontend UI flow to let a signed-in student delete their own comments from the feed, using a confirmation dialog and automatic feed refresh after deletion.",
-      "reqIds": [
-        "REQ-27"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-react-query-mutation-hook-for-deleting-comments-and-wire-it-into-the-comments-ui-following-the-existing-usedeletepost-pattern",
-      "title": "Add a React Query mutation hook for deleting comments and wire it into the comments UI, following the existing `useDeletePost` pattern.",
-      "reqIds": [
-        "REQ-28"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-eliminate-the-authenticated-startup-deadlock-by-updating-frontend-src-hooks-usequeries-ts-so-the-usegetcalleruserprofile-query-can-reach-a-terminal-state-success-or-error-even-when-the-backend-actor-fails-to-initialize-e-g-actor-creation-throws-initializeaccesscontrolwithsecret-traps-or-the-actor-never-becomes-available",
-      "title": "Eliminate the authenticated-startup deadlock by updating `frontend/src/hooks/useQueries.ts` so the `useGetCallerUserProfile` query can reach a terminal state (success or error) even when the backend actor fails to initialize (e.g., actor creation throws, `_initializeAccessControlWithSecret` traps, or the actor never becomes available).",
-      "reqIds": [
-        "REQ-29"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-frontend-src-app-tsx-bootstrap-gating-so-authenticated-users-never-see-an-endless-spinner-when-startup-cannot-complete-instead-show-bootstraperrorscreen-with-english-user-facing-messaging-and-working-actions-to-retry-and-log-out-for-any-startup-failure-path-including-actor-init-failures-and-profile-fetch-failures",
-      "title": "Update `frontend/src/App.tsx` bootstrap gating so authenticated users never see an endless spinner when startup cannot complete; instead, show `BootstrapErrorScreen` with English user-facing messaging and working actions to Retry and Log out for any startup failure path (including actor init failures and profile-fetch failures).",
-      "reqIds": [
-        "REQ-30"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-frontend-src-hooks-usequeries-ts-so-the-usegetcalleruserprofile-bootstrap-path-reaches-a-terminal-state-even-when-the-backend-actor-initialization-stays-isfetching-indefinitely-e-g-actor-creation-hangs-while-calling-initializeaccesscontrolwithsecret-specifically-start-the-existing-actor-initialization-timeout-countdown-when-actor-is-null-regardless-of-whether-actorfetching-is-true-or-false-and-after-the-timeout-ensure-the-profile-query-runs-and-fails-with-a-user-visible-error-instead-of-leaving-the-ui-in-a-perpetual-loading-state",
-      "title": "Update `frontend/src/hooks/useQueries.ts` so the `useGetCallerUserProfile` bootstrap path reaches a terminal state even when the backend actor initialization stays `isFetching` indefinitely (e.g., actor creation hangs while calling `_initializeAccessControlWithSecret`). Specifically: start the existing actor-initialization timeout countdown when `actor` is null regardless of whether `actorFetching` is true or false, and after the timeout ensure the profile query runs and fails with a user-visible error instead of leaving the UI in a perpetual loading state.",
-      "reqIds": [
-        "REQ-32"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-defensive-bootstrap-watchdog-in-frontend-src-app-tsx-to-prevent-any-remaining-edge-case-from-displaying-an-endless-loading-spinner-for-authenticated-users-if-the-authenticated-bootstrap-state-profileloading-isfetched-persists-beyond-a-fixed-duration-render-bootstraperrorscreen-with-english-messaging-that-indicates-startup-is-taking-too-long-and-provide-working-try-again-and-log-out-actions-using-the-same-retry-logout-behavior-already-used-for-the-normal-error-state",
-      "title": "Add a defensive bootstrap watchdog in `frontend/src/App.tsx` to prevent any remaining edge case from displaying an endless \"Loading...\" spinner for authenticated users. If the authenticated bootstrap state (`profileLoading || !isFetched`) persists beyond a fixed duration, render `BootstrapErrorScreen` with English messaging that indicates startup is taking too long, and provide working \"Try Again\" and \"Log Out\" actions using the same retry/logout behavior already used for the normal error state.",
-      "reqIds": [
-        "REQ-33"
       ],
       "version": 1
     }
@@ -244,131 +20,20 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Hornet Hive core social feed: students post text and images with username visible; record date/time for each post",
+      "summary": "Prevent a student from liking the same comment multiple times (enforce one like per student per comment).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Safety moderation: block inappropriate text (profanity/inappropriate topics) and validate usernames for profanity/inappropriateness",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Image safety moderation: analyze uploaded images and block posts with too much exposed skin or otherwise not school-appropriate content",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Post reporting: allow students to report messages/images; reported content taken down ASAP; poster notified anonymously (reporter hidden)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Account reporting & enforcement: account flagged by 5 distinct student reports triggers anonymous notification and 7-day posting suspension, then auto-reenable posting",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Reactions: allow liking posts/comments; no dislike option",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Weekly poll feature: each Friday generate poll of top 10 most talked-about topics; notify students; voting open Fri only; results visible Saturday morning; poll deleted Monday",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Branding: app name Hornet Hive with Kelly-green/white/black color scheme; free release on Google Play (and other app stores as applicable)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "UX improvement: show an inline poll creation text box directly on the Feed page so students can add a poll without pressing the \"+poll\" button",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Allow students to delete their own posts",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Add a backend capability for an authenticated student to delete a post they authored, and prevent deletion by non-authors.",
+      "summary": "Enforce a one-like-per-student-per-comment rule in the backend so the same authenticated caller cannot successfully like the same comment more than once.",
       "reqIds": [
-        "REQ-15"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Add an in-app \"Share app\" function so students can share Hornet Hive with friends (e.g., via system share sheet/link)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "UI update: add the Share button to the top-right app header alongside the Notifications button",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Add/replace Hornet Hive mascot asset in the app branding (use the provided mascot image)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Ensure the UI and PWA metadata continue to use the updated mascot-based branding assets wherever the app currently displays the Hornet Hive logo/app icon (header, login screen, favicon/apple-touch-icon, and manifest icon).",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Make backend access-control initialization safe for non-admin users so the frontend actor creation does not fail or hang when `actor._initializeAccessControlWithSecret('')` is called without an admin token (as done in `frontend/src/hooks/useActor.ts`). Specifically, ensure `_initializeAccessControlWithSecret` exists in the deployed backend interface and returns successfully (no trap) when provided an empty or missing secret, while preserving admin-only behavior for privileged operations.",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-19",
-      "summary": "Allow students to delete their own comments (with author-only permission enforcement)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Add a backend canister method to delete a comment from a post, enforcing that only the authenticated comment author can delete their own comment.",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-23",
-      "summary": "Verify backend compatibility for authenticated actor initialization by ensuring the deployed backend interface includes `_initializeAccessControlWithSecret` and that calling it with an empty string (no admin token) completes successfully (no trap), so non-admin users can still bootstrap the app reliably.",
-      "reqIds": [
-        "REQ-31"
+        "REQ-1"
       ],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Hornet Hive",
+  "projectName": "Prevent duplicate likes on the same comment by the same student",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Post, UserProfile } from '../backend';
+import type { PostView, UserProfile } from '../backend';
 import { ExternalBlob } from '../backend';
 import { Principal } from '@dfinity/principal';
 import { useEffect, useState, useRef } from 'react';
@@ -112,7 +112,7 @@ export function useSetUniqueUsername() {
 export function useGetPosts() {
   const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<Post[]>({
+  return useQuery<PostView[]>({
     queryKey: ['posts'],
     queryFn: async () => {
       if (!actor) return [];
@@ -210,6 +210,10 @@ export function useLikeComment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
+    // Don't invalidate on error - let the component handle it
+    onError: () => {
+      // Error is handled in the component
+    },
   });
 }
 
@@ -221,6 +225,21 @@ export function useReportPost() {
     mutationFn: async (postId: bigint) => {
       if (!actor) throw new Error('Actor not available');
       await actor.reportPost(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+}
+
+export function useReportComment() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ postId, commentId }: { postId: bigint; commentId: bigint }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.reportComment(postId, commentId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });

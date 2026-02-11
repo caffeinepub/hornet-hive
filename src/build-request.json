@@ -1,53 +1,54 @@
 {
   "kind": "build_request",
-  "title": "Eliminate remaining app-side startup deadlock and replace endless loading with a terminal error state",
-  "priority": "high",
+  "title": "Prevent duplicate likes on the same comment by the same student",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-32",
-      "text": "Update `frontend/src/hooks/useQueries.ts` so the `useGetCallerUserProfile` bootstrap path reaches a terminal state even when the backend actor initialization stays `isFetching` indefinitely (e.g., actor creation hangs while calling `_initializeAccessControlWithSecret`). Specifically: start the existing actor-initialization timeout countdown when `actor` is null regardless of whether `actorFetching` is true or false, and after the timeout ensure the profile query runs and fails with a user-visible error instead of leaving the UI in a perpetual loading state.",
-      "target": "frontend",
+      "id": "REQ-1",
+      "text": "Enforce a one-like-per-student-per-comment rule in the backend so the same authenticated caller cannot successfully like the same comment more than once.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-8"
         ],
         "quotes": [
-          "keep digging on the app side; it’s still stuck"
+          "Make it so that the same student cannot like the same comment multiple times."
         ]
       },
       "acceptanceCriteria": [
-        "With an authenticated identity, if the actor never becomes available and `useActor()` remains in a fetching state, the app stops showing the spinner and transitions to the existing error UI (`BootstrapErrorScreen`) within the timeout window (<= 10 seconds total for the actor timeout + query execution).",
-        "The resulting error shown by `BootstrapErrorScreen` uses English user-facing text (no raw stack traces in the main message) and still allows viewing technical details in the collapsible section.",
-        "Clicking \"Try Again\" triggers a new attempt to initialize the actor and refetch the profile without requiring a page refresh."
+        "Calling likeComment(postId, commentId) the first time increments that comment's likes by exactly 1.",
+        "Calling likeComment(postId, commentId) again from the same caller does not change the comment's likes count.",
+        "The second (and subsequent) like attempts from the same caller for the same comment return a clear error (trap) message in English (e.g., \"You have already liked this comment.\").",
+        "Different authenticated callers can each like the same comment once, and each successful like increments the likes count by 1."
       ]
     },
     {
-      "id": "REQ-33",
-      "text": "Add a defensive bootstrap watchdog in `frontend/src/App.tsx` to prevent any remaining edge case from displaying an endless \"Loading...\" spinner for authenticated users. If the authenticated bootstrap state (`profileLoading || !isFetched`) persists beyond a fixed duration, render `BootstrapErrorScreen` with English messaging that indicates startup is taking too long, and provide working \"Try Again\" and \"Log Out\" actions using the same retry/logout behavior already used for the normal error state.",
+      "id": "REQ-2",
+      "text": "Surface duplicate-like errors in the UI when liking a comment, showing an English user-facing message rather than failing silently.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-8"
         ],
         "quotes": [
-          "keep digging on the app side; it’s still stuck"
+          "Make it so that the same student cannot like the same comment multiple times."
         ]
       },
       "acceptanceCriteria": [
-        "For authenticated users, the loading spinner cannot remain on screen indefinitely; after the watchdog duration elapses, the app shows `BootstrapErrorScreen`.",
-        "The watchdog error screen’s primary text is in English and does not blame the user; it indicates the app could not finish starting up and suggests trying again.",
-        "The watchdog \"Try Again\" action resets any timeout/watchdog state and attempts to re-bootstrap (invalidate actor query + refetch profile); \"Log Out\" clears identity and returns to the login screen."
+        "If the backend rejects a duplicate comment-like attempt, the user sees an English error message (e.g., via toast or an inline alert) indicating they already liked the comment.",
+        "The UI remains responsive after the error (the user can continue browsing/liking other comments)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify immutable frontend files: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
-    "Keep all user-facing text in English."
+    "Backend must remain a single Motoko actor in backend/main.mo.",
+    "Do not edit files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Backend changes to Motoko access control or `_initializeAccessControlWithSecret` behavior.",
-    "Changing the Internet Identity login flow UX beyond what is necessary to avoid an endless spinner.",
-    "Adding new features unrelated to startup/bootstrapping."
+    "Implementing unlike/toggle-like behavior for comments.",
+    "Preventing duplicate likes on posts (only comments are in scope).",
+    "Adding real-time updates beyond existing React Query invalidation/polling behavior."
   ],
   "imageRequirements": {
     "required": [],

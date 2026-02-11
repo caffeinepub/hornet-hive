@@ -1,4 +1,4 @@
-import type { Post } from '../backend';
+import type { PostView } from '../backend';
 import { normalizeText } from '../moderation/disallowedTerms';
 
 /**
@@ -25,7 +25,7 @@ const STOP_WORDS = new Set([
   'very', 'just', 'about', 'into', 'through', 'during', 'before', 'after',
 ]);
 
-export function extractWeeklyTopics(posts: Post[]): string[] {
+export function extractWeeklyTopics(posts: PostView[]): string[] {
   const wordCounts = new Map<string, number>();
   
   // Collect all text

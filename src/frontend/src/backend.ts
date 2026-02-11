@@ -90,15 +90,10 @@ export class ExternalBlob {
     }
 }
 export type Time = bigint;
-export interface Comment {
-    id: bigint;
-    content: string;
-    authorId: Principal;
-    authorName: string;
-    likes: bigint;
-    timestamp: Time;
+export interface _CaffeineStorageRefillInformation {
+    proposed_top_up_amount?: bigint;
 }
-export interface Post {
+export interface PostView {
     id: bigint;
     content: string;
     authorId: Principal;
@@ -106,15 +101,21 @@ export interface Post {
     likes: bigint;
     timestamp: Time;
     image?: ExternalBlob;
-    comments: Array<Comment>;
+    comments: Array<CommentView>;
     reported: boolean;
-}
-export interface _CaffeineStorageRefillInformation {
-    proposed_top_up_amount?: bigint;
 }
 export interface _CaffeineStorageCreateCertificateResult {
     method: string;
     blob_hash: string;
+}
+export interface CommentView {
+    id: bigint;
+    content: string;
+    authorId: Principal;
+    authorName: string;
+    likes: bigint;
+    timestamp: Time;
+    reported: boolean;
 }
 export interface UserProfile {
     name: string;
@@ -144,17 +145,18 @@ export interface backendInterface {
     deletePost(postId: bigint): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getPosts(): Promise<Array<Post>>;
+    getPosts(): Promise<Array<PostView>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     likeComment(postId: bigint, commentId: bigint): Promise<void>;
     likePost(postId: bigint): Promise<void>;
+    reportComment(postId: bigint, commentId: bigint): Promise<void>;
     reportPost(postId: bigint): Promise<void>;
     reportUser(reportedUser: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setUniqueUsername(username: string): Promise<void>;
 }
-import type { Comment as _Comment, ExternalBlob as _ExternalBlob, Post as _Post, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
+import type { CommentView as _CommentView, ExternalBlob as _ExternalBlob, PostView as _PostView, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _caffeineStorageBlobIsLive(arg0: Uint8Array): Promise<boolean> {
@@ -353,7 +355,7 @@ export class Backend implements backendInterface {
             return from_candid_UserRole_n16(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getPosts(): Promise<Array<Post>> {
+    async getPosts(): Promise<Array<PostView>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getPosts();
@@ -423,6 +425,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async reportComment(arg0: bigint, arg1: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.reportComment(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.reportComment(arg0, arg1);
+            return result;
+        }
+    }
     async reportPost(arg0: bigint): Promise<void> {
         if (this.processError) {
             try {
@@ -483,7 +499,7 @@ export class Backend implements backendInterface {
 async function from_candid_ExternalBlob_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ExternalBlob): Promise<ExternalBlob> {
     return await _downloadFile(value);
 }
-async function from_candid_Post_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Post): Promise<Post> {
+async function from_candid_PostView_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PostView): Promise<PostView> {
     return await from_candid_record_n20(_uploadFile, _downloadFile, value);
 }
 function from_candid_UserProfile_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserProfile): UserProfile {
@@ -530,7 +546,7 @@ async function from_candid_record_n20(_uploadFile: (file: ExternalBlob) => Promi
     likes: bigint;
     timestamp: _Time;
     image: [] | [_ExternalBlob];
-    comments: Array<_Comment>;
+    comments: Array<_CommentView>;
     reported: boolean;
 }): Promise<{
     id: bigint;
@@ -540,7 +556,7 @@ async function from_candid_record_n20(_uploadFile: (file: ExternalBlob) => Promi
     likes: bigint;
     timestamp: Time;
     image?: ExternalBlob;
-    comments: Array<Comment>;
+    comments: Array<CommentView>;
     reported: boolean;
 }> {
     return {
@@ -576,8 +592,8 @@ function from_candid_variant_n17(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
-async function from_candid_vec_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Post>): Promise<Array<Post>> {
-    return await Promise.all(value.map(async (x)=>await from_candid_Post_n19(_uploadFile, _downloadFile, x)));
+async function from_candid_vec_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_PostView>): Promise<Array<PostView>> {
+    return await Promise.all(value.map(async (x)=>await from_candid_PostView_n19(_uploadFile, _downloadFile, x)));
 }
 async function to_candid_ExternalBlob_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ExternalBlob): Promise<_ExternalBlob> {
     return await _uploadFile(value);

@@ -11,7 +11,10 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
+import Set "mo:core/Set";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   // Integrate storage and authentication modules
   include MixinStorage();
@@ -76,6 +79,18 @@ actor {
     content : Text;
     likes : Nat;
     timestamp : Time.Time;
+    reported : Bool;
+    likedBy : Set.Set<Principal>;
+  };
+
+  type CommentView = {
+    id : Nat;
+    authorName : Text;
+    authorId : Principal;
+    content : Text;
+    likes : Nat;
+    timestamp : Time.Time;
+    reported : Bool;
   };
 
   type Post = {
@@ -87,6 +102,18 @@ actor {
     timestamp : Time.Time;
     likes : Nat;
     comments : [Comment];
+    reported : Bool;
+  };
+
+  type PostView = {
+    id : Nat;
+    authorName : Text;
+    authorId : Principal;
+    content : Text;
+    image : ?Storage.ExternalBlob;
+    timestamp : Time.Time;
+    likes : Nat;
+    comments : [CommentView];
     reported : Bool;
   };
 
@@ -164,6 +191,8 @@ actor {
       content;
       likes = 0;
       timestamp = Time.now();
+      reported = false;
+      likedBy = Set.empty<Principal>();
     };
 
     let updatedPosts = mutablePosts.toArray().map(
@@ -248,9 +277,93 @@ actor {
     };
   };
 
-  public query ({ caller }) func getPosts() : async [Post] {
+  public shared ({ caller }) func reportComment(postId : Nat, commentId : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can report comments");
+    };
+
+    let postsArray = mutablePosts.toArray();
+    let postIndex = postsArray.findIndex(func(p) { p.id == postId });
+
+    switch (postIndex) {
+      case (?pIdx) {
+        let post = postsArray[pIdx];
+        let commentIndex = post.comments.findIndex(func(c) { c.id == commentId });
+
+        switch (commentIndex) {
+          case (?cIdx) {
+            let updatedComments = post.comments.map(
+              func(c) {
+                {
+                  id = c.id;
+                  authorName = c.authorName;
+                  authorId = c.authorId;
+                  content = c.content;
+                  likes = c.likes;
+                  timestamp = c.timestamp;
+                  reported = c.id == commentId;
+                  likedBy = c.likedBy;
+                };
+              }
+            );
+
+            let updatedPost : Post = {
+              id = post.id;
+              authorName = post.authorName;
+              authorId = post.authorId;
+              content = post.content;
+              image = post.image;
+              timestamp = post.timestamp;
+              likes = post.likes;
+              comments = updatedComments;
+              reported = post.reported;
+            };
+
+            let updatedPostsArray = postsArray.toVarArray<Post>();
+            updatedPostsArray[pIdx] := updatedPost;
+
+            mutablePosts.clear();
+            mutablePosts.addAll(updatedPostsArray.toArray().values());
+          };
+          case (null) { Runtime.trap("Comment not found") };
+        };
+      };
+      case (null) { Runtime.trap("Post not found") };
+    };
+  };
+
+  public query ({ caller }) func getPosts() : async [PostView] {
     let visiblePosts = mutablePosts.toArray().filter(func(p) { not p.reported });
-    visiblePosts.sort();
+    let postsWithFilteredComments = visiblePosts.map(
+      func(p) {
+        let visibleComments = p.comments.filter(func(c) { not c.reported });
+        let immutableComments = visibleComments.map(
+          func(c) {
+            {
+              id = c.id;
+              authorName = c.authorName;
+              authorId = c.authorId;
+              content = c.content;
+              likes = c.likes;
+              timestamp = c.timestamp;
+              reported = c.reported;
+            };
+          }
+        );
+        {
+          id = p.id;
+          authorName = p.authorName;
+          authorId = p.authorId;
+          content = p.content;
+          image = p.image;
+          timestamp = p.timestamp;
+          likes = p.likes;
+          comments = immutableComments;
+          reported = p.reported;
+        };
+      }
+    );
+    postsWithFilteredComments;
   };
 
   public shared ({ caller }) func likePost(postId : Nat) : async () {
@@ -287,38 +400,34 @@ actor {
       Runtime.trap("Unauthorized: Only authenticated users can like comments");
     };
 
+    let updateCommentLikes = func(comment : Comment, caller : Principal) : Comment {
+      if (comment.likedBy.contains(caller)) {
+        comment; // No change if caller has already liked
+      } else {
+        let newLikedBy = comment.likedBy.clone();
+        newLikedBy.add(caller);
+        { comment with likes = comment.likes + 1; likedBy = newLikedBy };
+      };
+    };
+
     let updatedPosts = mutablePosts.toArray().map(
-      func(p) {
-        if (p.id == postId) {
-          let updatedComments = p.comments.map(
-            func(c) {
-              if (c.id == commentId) {
-                {
-                  id = c.id;
-                  authorName = c.authorName;
-                  authorId = c.authorId;
-                  content = c.content;
-                  likes = c.likes + 1;
-                  timestamp = c.timestamp;
-                };
+      func(post) {
+        if (post.id == postId) {
+          let updatedComments = post.comments.map(
+            func(comment) {
+              if (comment.id == commentId) {
+                updateCommentLikes(comment, caller);
               } else {
-                c;
+                comment;
               };
             }
           );
           {
-            id = p.id;
-            authorName = p.authorName;
-            authorId = p.authorId;
-            content = p.content;
-            image = p.image;
-            timestamp = p.timestamp;
-            likes = p.likes;
-            comments = updatedComments;
-            reported = p.reported;
+            post with
+            comments = updatedComments
           };
         } else {
-          p;
+          post;
         };
       }
     );

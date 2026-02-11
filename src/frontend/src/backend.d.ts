@@ -15,15 +15,7 @@ export class ExternalBlob {
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
 export type Time = bigint;
-export interface Comment {
-    id: bigint;
-    content: string;
-    authorId: Principal;
-    authorName: string;
-    likes: bigint;
-    timestamp: Time;
-}
-export interface Post {
+export interface PostView {
     id: bigint;
     content: string;
     authorId: Principal;
@@ -31,7 +23,16 @@ export interface Post {
     likes: bigint;
     timestamp: Time;
     image?: ExternalBlob;
-    comments: Array<Comment>;
+    comments: Array<CommentView>;
+    reported: boolean;
+}
+export interface CommentView {
+    id: bigint;
+    content: string;
+    authorId: Principal;
+    authorName: string;
+    likes: bigint;
+    timestamp: Time;
     reported: boolean;
 }
 export interface UserProfile {
@@ -51,11 +52,12 @@ export interface backendInterface {
     deletePost(postId: bigint): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getPosts(): Promise<Array<Post>>;
+    getPosts(): Promise<Array<PostView>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     likeComment(postId: bigint, commentId: bigint): Promise<void>;
     likePost(postId: bigint): Promise<void>;
+    reportComment(postId: bigint, commentId: bigint): Promise<void>;
     reportPost(postId: bigint): Promise<void>;
     reportUser(reportedUser: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;

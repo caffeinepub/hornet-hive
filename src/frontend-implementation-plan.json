@@ -1,42 +1,25 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Eliminate remaining startup deadlocks and replace endless loading with terminal error states",
+  "title": "Show duplicate comment-like errors in UI",
   "requirements": [
     {
-      "id": "REQ-32",
-      "summary": "Ensure useGetCallerUserProfile reaches a terminal error state even if actor initialization remains indefinitely fetching, and make retry re-bootstrap without refresh.",
+      "id": "REQ-2",
+      "summary": "Display a clear English UI error when the backend rejects a duplicate like on a comment, without breaking interaction with the feed.",
       "acceptanceCriteria": [
-        "With an authenticated identity, if the actor never becomes available and `useActor()` remains in a fetching state, the app stops showing the spinner and transitions to the existing error UI (`BootstrapErrorScreen`) within the timeout window (<= 10 seconds total for the actor timeout + query execution).",
-        "The resulting error shown by `BootstrapErrorScreen` uses English user-facing text (no raw stack traces in the main message) and still allows viewing technical details in the collapsible section.",
-        "Clicking \"Try Again\" triggers a new attempt to initialize the actor and refetch the profile without requiring a page refresh."
+        "If the backend rejects a duplicate comment-like attempt, the user sees an English error message (e.g., via toast or an inline alert) indicating they already liked the comment.",
+        "The UI remains responsive after the error (the user can continue browsing/liking other comments)."
       ],
       "file_operations": [
+        {
+          "path": "frontend/src/components/feed/CommentsThread.tsx",
+          "operation": "modify",
+          "description": "Handle errors from liking a comment by switching to an async like handler (e.g., mutateAsync + try/catch) and surfacing a user-facing English message when the call fails; map the backend duplicate-like trap message to a stable English message such as \"You have already liked this comment.\" and ensure the rest of the thread remains usable after the error."
+        },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update `useGetCallerUserProfile` bootstrap behavior so the actor-init timeout countdown starts whenever `actor` is null (regardless of `actorFetching`), and after timeout the profile query is allowed to execute and fail into a user-visible error state (instead of perpetual loading). Refactor timeout state so it can be fully reset on retry (e.g., clear any in-flight timer state and restart countdown), while keeping all user-facing error messages in English."
-        }
-      ]
-    },
-    {
-      "id": "REQ-33",
-      "summary": "Add an App-level bootstrap watchdog so authenticated users never see an endless spinner; after a fixed duration show BootstrapErrorScreen with working retry/logout actions.",
-      "acceptanceCriteria": [
-        "For authenticated users, the loading spinner cannot remain on screen indefinitely; after the watchdog duration elapses, the app shows `BootstrapErrorScreen`.",
-        "The watchdog error screen’s primary text is in English and does not blame the user; it indicates the app could not finish starting up and suggests trying again.",
-        "The watchdog \"Try Again\" action resets any timeout/watchdog state and attempts to re-bootstrap (invalidate actor query + refetch profile); \"Log Out\" clears identity and returns to the login screen."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add a defensive bootstrap watchdog timer for authenticated users: if `profileLoading || !isFetched` persists beyond a fixed duration, render `BootstrapErrorScreen` instead of the loading spinner. Wire `Try Again` to reset watchdog state, call the existing retry behavior (invalidate the actor query + refetch the profile + reset the hook timeout), and wire `Log Out` to the existing logout behavior (clear identity + clear React Query cache) so the app returns to `LoginScreen` without refresh."
-        },
-        {
-          "path": "frontend/src/components/auth/BootstrapErrorScreen.tsx",
-          "operation": "modify",
-          "description": "Extend the user-friendly English message mapping to include the new watchdog startup-timeout case (e.g., when the provided error message indicates startup is taking too long), while keeping technical details available only in the collapsible section and avoiding raw stack traces in the primary message."
+          "description": "Adjust the comment-like mutation behavior to support UI error surfacing (e.g., ensure errors are not swallowed and that cache invalidation only happens on success) so that duplicate-like failures can be displayed reliably while keeping the UI responsive."
         }
       ]
     }

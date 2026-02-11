@@ -25,12 +25,13 @@
   "frontend/src/pages/CreatePostPage.tsx": "Post creation page with text input, optional image upload, validation, and suspension status handling.",
   "frontend/src/pages/NotificationsPage.tsx": "Notifications center displaying moderation/reporting notices in reverse chronological order.",
   "frontend/src/pages/PollsPage.tsx": "Weekly poll page that renders the shared WeeklyPollPanel component with full layout and messaging.",
-  "frontend/src/pages/ProfilePage.tsx": "User profile page showing username, suspension status, account info, and logout button with footer attribution.",
+  "frontend/src/pages/ProfilePage.tsx": "User profile page showing username, suspension status, account info, new share functionality with Web Share API and copy link fallback, and logout button with footer attribution.",
   "frontend/src/index.css": "Global styles with Kelly-green OKLCH color system for light/dark modes and mobile-first responsive utilities.",
   "frontend/tailwind.config.js": "Tailwind configuration with Kelly-green color tokens, custom border radius, and mobile-first container settings.",
   "frontend/index.html": "HTML entry point with mobile viewport settings, theme color, and manifest reference for PWA support.",
   "frontend/public/manifest.webmanifest": "Web app manifest for installable PWA experience with Hornet Hive branding and Kelly-green theme.",
   "frontend/src/polls/useWeeklyPoll.ts": "Shared React hook that encapsulates weekly poll behavior including poll creation, voting, and state management using existing poll time window and localStorage logic.",
   "frontend/src/components/polls/WeeklyPollPanel.tsx": "Reusable weekly poll UI component that displays voting interface, results, and informational states with optional compact mode for inline display.",
-  "frontend/src/components/feed/DeletePostDialog.tsx": "Confirmation dialog component for deleting posts using AlertDialog with permanent deletion warning and error handling via toast notifications."
+  "frontend/src/components/feed/DeletePostDialog.tsx": "Confirmation dialog component for deleting posts using AlertDialog with permanent deletion warning and error handling via toast notifications.",
+  "frontend/src/utils/shareHornetHive.ts": "Share utility that implements Web Share API with automatic fallback to clipboard (modern and legacy methods) for sharing the Hornet Hive app URL with friends."
 }

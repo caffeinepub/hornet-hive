@@ -5,19 +5,67 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { User, LogOut, AlertTriangle } from 'lucide-react';
+import { User, LogOut, AlertTriangle, Share2, Copy } from 'lucide-react';
 import { formatSuspensionEnd } from '../utils/timeFormat';
+import { shareHornetHive, copyLinkToClipboard, isWebShareSupported } from '../utils/shareHornetHive';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 export default function ProfilePage() {
   const { identity, clear } = useInternetIdentity();
   const { data: profile } = useGetCallerUserProfile();
   const { isSuspended, suspensionEnd } = useSuspensionStatus();
   const queryClient = useQueryClient();
+  const [isSharing, setIsSharing] = useState(false);
 
   const handleLogout = async () => {
     await clear();
     queryClient.clear();
   };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      const result = await shareHornetHive();
+      
+      if (result.success) {
+        if (result.method === 'webshare') {
+          // Web Share API succeeded - no toast needed as native UI was shown
+        } else {
+          // Clipboard methods succeeded
+          toast.success('Link copied to clipboard!');
+        }
+      } else {
+        // Only show error if it wasn't a user cancellation
+        if (result.error !== 'Share cancelled') {
+          toast.error('Could not share link');
+        }
+      }
+    } catch (error) {
+      toast.error('Could not share link');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    setIsSharing(true);
+    try {
+      const result = await copyLinkToClipboard();
+      
+      if (result.success) {
+        toast.success('Link copied to clipboard!');
+      } else {
+        toast.error('Could not copy link');
+      }
+    } catch (error) {
+      toast.error('Could not copy link');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const webShareSupported = isWebShareSupported();
 
   return (
     <div className="space-y-4">
@@ -53,6 +101,47 @@ export default function ProfilePage() {
               <p className="text-xs font-mono break-all">{identity.getPrincipal().toString()}</p>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Share Hornet Hive</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Invite your friends to join Hornet Hive and connect with the Eureka community!
+          </p>
+          <div className="flex gap-2">
+            {webShareSupported ? (
+              <>
+                <Button
+                  onClick={handleShare}
+                  disabled={isSharing}
+                  className="flex-1"
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share App
+                </Button>
+                <Button
+                  onClick={handleCopyLink}
+                  disabled={isSharing}
+                  variant="outline"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={handleCopyLink}
+                disabled={isSharing}
+                className="w-full"
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Copy Link
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 

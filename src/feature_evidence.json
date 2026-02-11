@@ -2,12 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-frontend-ui-flow-that-lets-a-signed-in-student-delete-their-own-post-from-the-feed-with-a-confirmation-dialog-and-automatic-feed-refresh",
-      "featureTitle": "Add a frontend UI flow that lets a signed-in student delete their own post from the feed, with a confirmation dialog and automatic feed refresh.",
+      "featureId": "feature-add-an-in-app-share-hornet-hive-action-that-lets-a-signed-in-student-share-the-app-using-the-device-browser-system-share-sheet-when-available-web-share-api",
+      "featureTitle": "Add an in-app \"Share Hornet Hive\" action that lets a signed-in student share the app using the device/browser system share sheet when available (Web Share API).",
       "files": [
-        "frontend/src/components/feed/DeletePostDialog.tsx",
-        "frontend/src/components/feed/PostCard.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/pages/ProfilePage.tsx",
+        "frontend/src/utils/shareHornetHive.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -19,7 +18,28 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-17"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-a-non-web-share-fallback-so-sharing-still-works-on-browsers-devices-that-do-not-support-the-web-share-api",
+      "featureTitle": "Provide a non-Web-Share fallback so sharing still works on browsers/devices that do not support the Web Share API.",
+      "files": [
+        "frontend/src/pages/ProfilePage.tsx",
+        "frontend/src/utils/shareHornetHive.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-18"
       ],
       "confidence": "high"
     }

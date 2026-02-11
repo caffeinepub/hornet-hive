@@ -1,52 +1,50 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T02:23:49.796Z",
+  "generatedAt": "2026-02-11T02:36:15.890Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 1,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-15",
-        "summary": "Add a backend capability for an authenticated student to delete a post they authored, and prevent deletion by non-authors.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-16",
-        "summary": "Add a frontend UI flow that lets a signed-in student delete their own post from the feed, with a confirmation dialog and automatic feed refresh.",
+        "id": "REQ-17",
+        "summary": "Add an in-app \"Share Hornet Hive\" action that lets a signed-in student share the app using the device/browser system share sheet when available (Web Share API).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/feed/DeletePostDialog.tsx",
-          "frontend/src/components/feed/PostCard.tsx"
+          "frontend/src/utils/shareHornetHive.ts",
+          "frontend/src/pages/ProfilePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/feed/DeletePostDialog.tsx",
-          "frontend/src/components/feed/PostCard.tsx"
+          "frontend/src/utils/shareHornetHive.ts",
+          "frontend/src/pages/ProfilePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-18",
+        "summary": "Provide a non-Web-Share fallback so sharing still works on browsers/devices that do not support the Web Share API.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/shareHornetHive.ts",
+          "frontend/src/pages/ProfilePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/shareHornetHive.ts",
+          "frontend/src/pages/ProfilePage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/feed/DeletePostDialog.tsx",
-    "frontend/src/components/feed/PostCard.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/ProfilePage.tsx",
+    "frontend/src/utils/shareHornetHive.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

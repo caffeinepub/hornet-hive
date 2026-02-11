@@ -1,34 +1,47 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Frontend: Delete own posts from feed",
+  "title": "In-app sharing for Hornet Hive (Web Share + Copy Link fallback)",
   "requirements": [
     {
-      "id": "REQ-16",
-      "summary": "Let a signed-in student delete their own post from the feed with confirmation, backend call, and automatic refresh while preserving report actions for non-authors.",
+      "id": "REQ-17",
+      "summary": "Add a signed-in \"Share Hornet Hive\" action in the Profile page that uses the Web Share API when available.",
       "acceptanceCriteria": [
-        "For posts authored by the current signed-in user, the post card shows an overflow/menu action that includes a \"Delete Post\" option.",
-        "Tapping \"Delete Post\" opens a confirmation dialog with English text that clearly warns the action is permanent (e.g., title \"Delete this post?\", confirm button \"Delete\", cancel button \"Cancel\").",
-        "Confirming deletion calls a new React Query mutation hook that invokes the backend delete-post method.",
-        "On success, the posts query is invalidated/refetched so the deleted post disappears from the feed without a manual refresh.",
-        "On failure, a user-visible English error message is shown (toast or inline) using the error message returned from the backend when available.",
-        "The existing reporting menu/actions for non-own posts remain available and unchanged (i.e., only the author sees delete; non-authors see report actions)."
+        "A clearly labeled share action (e.g., a button) is available in the signed-in app UI (recommended placement: Profile page).",
+        "On supported platforms, tapping the share action opens the native/system share sheet via the Web Share API.",
+        "The shared payload includes at minimum: title \"Hornet Hive\", a short text invite message in English, and a URL pointing to the current app origin (e.g., window.location.origin)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add a new React Query mutation hook (e.g., useDeletePost) that calls the existing backend capability actor.deletePost(postId) and invalidates the ['posts'] query on success; surface thrown errors so UI can display backend-provided messages when available."
-        },
-        {
-          "path": "frontend/src/components/feed/DeletePostDialog.tsx",
+          "path": "frontend/src/utils/shareHornetHive.ts",
           "operation": "create",
-          "description": "Create a confirmation dialog component for deleting a post using the existing shadcn/ui AlertDialog components (do not modify ui files). The dialog must use English text warning deletion is permanent, call the useDeletePost mutation on confirm, close on success, and show user-visible error feedback via sonner toast on failure. Verify the component's usage instructions before implementing."
+          "description": "Create a small share utility (no backend required) that builds the share payload (title: \"Hornet Hive\", English invite text, url: window.location.origin) and triggers the Web Share API when supported. Handle errors by returning a success/failure result to the caller."
         },
         {
-          "path": "frontend/src/components/feed/PostCard.tsx",
+          "path": "frontend/src/pages/ProfilePage.tsx",
           "operation": "modify",
-          "description": "Update the post overflow/menu logic to show an overflow/menu for the author’s own posts containing a \"Delete Post\" action while keeping the existing report actions unchanged for non-authors. Wire the new DeletePostDialog into PostCard state (open/close) and trigger it from the \"Delete Post\" menu item; on successful deletion rely on query invalidation to refresh the feed."
+          "description": "Add a clearly labeled \"Share Hornet Hive\" Button to the signed-in Profile page UI that calls the new share utility. Use the existing shadcn-ui Button component for consistent styling. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "summary": "Add a graceful non-Web-Share fallback (Copy link) with sonner toast feedback when Web Share is unavailable or fails.",
+      "acceptanceCriteria": [
+        "If navigator.share is unavailable or fails, the UI offers a \"Copy link\" fallback that copies the app URL to the clipboard (navigator.clipboard when available).",
+        "User receives clear success/error feedback using the existing toast system (sonner) with English messages (e.g., \"Link copied\" / \"Could not copy link\").",
+        "The share flow never crashes the app; failures are handled gracefully and keep the user on the same screen."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/shareHornetHive.ts",
+          "operation": "modify",
+          "description": "Extend the share utility to implement a Copy link fallback: attempt navigator.clipboard.writeText(window.location.origin) when available, and provide a safe legacy fallback (e.g., temporary textarea + document.execCommand) if needed. Ensure functions never throw uncaught errors and instead return a structured failure result."
+        },
+        {
+          "path": "frontend/src/pages/ProfilePage.tsx",
+          "operation": "modify",
+          "description": "Wire fallback UX on the Profile page: if Web Share is unsupported, show a \"Copy link\" action; if Web Share fails, keep the user on the same page and offer Copy link (either as an always-visible secondary action or revealed after failure). Use sonner toasts for success/error feedback with English messages (e.g., \"Link copied\" / \"Could not copy link\")."
         }
       ]
     }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
+  "projectStateVersion": 9,
   "summary": "Build a mobile social app named \"Hornet Hive\" for students in Eureka, Illinois: a safe, moderated group-chat-style feed with strict text/image appropriateness enforcement, reporting workflows, likes (no dislikes), and weekly topic polls.",
   "architectural_notes": [
     "Target platform: mobile app distribution via Google Play (free).",
@@ -130,6 +130,22 @@
         "REQ-16"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-an-in-app-share-hornet-hive-action-that-lets-a-signed-in-student-share-the-app-using-the-device-browser-system-share-sheet-when-available-web-share-api",
+      "title": "Add an in-app \"Share Hornet Hive\" action that lets a signed-in student share the app using the device/browser system share sheet when available (Web Share API).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-non-web-share-fallback-so-sharing-still-works-on-browsers-devices-that-do-not-support-the-web-share-api",
+      "title": "Provide a non-Web-Share fallback so sharing still works on browsers/devices that do not support the Web Share API.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -199,6 +215,12 @@
       "reqIds": [
         "REQ-15"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add an in-app \"Share app\" function so students can share Hornet Hive with friends (e.g., via system share sheet/link)",
+      "reqIds": [],
       "status": "pending"
     }
   ],

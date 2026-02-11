@@ -1,5 +1,6 @@
 import { useGetPosts } from '../hooks/useQueries';
 import PostCard from '../components/feed/PostCard';
+import WeeklyPollPanel from '../components/polls/WeeklyPollPanel';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -27,6 +28,8 @@ export default function FeedPage() {
           <RefreshCw className={`h-5 w-5 ${isFetching ? 'animate-spin' : ''}`} />
         </Button>
       </div>
+
+      <WeeklyPollPanel compact />
 
       {posts && posts.length === 0 ? (
         <div className="text-center py-12">

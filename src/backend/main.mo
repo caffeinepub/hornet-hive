@@ -30,7 +30,6 @@ actor {
 
   // Enforce unique usernames
   public shared ({ caller }) func setUniqueUsername(username : Text) : async () {
-    // Authorization: Only authenticated users can set username
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can set username");
     };
@@ -39,7 +38,6 @@ actor {
       Runtime.trap("Username cannot be empty");
     };
 
-    // Ensure username uniqueness across all profiles
     for ((user, profile) in userProfiles.entries()) {
       if (profile.name == username) {
         Runtime.trap("Username must be unique");
@@ -48,7 +46,7 @@ actor {
 
     let profile = {
       name = username;
-      accountSuspendedUntil = null; // No suspension by default
+      accountSuspendedUntil = null;
     };
     userProfiles.add(caller, profile);
   };
@@ -61,8 +59,6 @@ actor {
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    // Users can view any profile (needed for displaying post authors)
-    // No strict authorization needed for viewing public profiles
     userProfiles.get(user);
   };
 
@@ -91,18 +87,15 @@ actor {
     timestamp : Time.Time;
     likes : Nat;
     comments : [Comment];
-    reported : Bool; // Track if post is reported
+    reported : Bool;
   };
 
-  // Posts stored persistently
   let mutablePosts = List.empty<Post>();
   var nextPostId = 0;
   var nextCommentId = 0;
 
-  // Helper comparison function for sorting posts by time
   module Post {
     public func compare(post1 : Post, post2 : Post) : Order.Order {
-      // Convert Time to Nat before comparison
       Nat.compare(
         post2.timestamp.toNat(),
         post1.timestamp.toNat(),
@@ -110,20 +103,16 @@ actor {
     };
   };
 
-  // Post with image support
   public shared ({ caller }) func createPost(content : Text, image : ?Storage.ExternalBlob) : async () {
-    // Authorization: Only authenticated users can create posts
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can create posts");
     };
 
-    // Check if user has a profile (username set)
     let profile = switch (userProfiles.get(caller)) {
       case (?p) { p };
       case (null) { Runtime.trap("User must set username before posting") };
     };
 
-    // Check if user is suspended
     switch (profile.accountSuspendedUntil) {
       case (?suspensionEnd) {
         if (Time.now() < suspensionEnd) {
@@ -149,20 +138,16 @@ actor {
     nextPostId += 1;
   };
 
-  // Add comment functionality
   public shared ({ caller }) func addComment(postId : Nat, content : Text) : async () {
-    // Authorization: Only authenticated users can comment
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can comment");
     };
 
-    // Check if user has a profile (username set)
     let profile = switch (userProfiles.get(caller)) {
       case (?p) { p };
       case (null) { Runtime.trap("User must set username before commenting") };
     };
 
-    // Check if user is suspended
     switch (profile.accountSuspendedUntil) {
       case (?suspensionEnd) {
         if (Time.now() < suspensionEnd) {
@@ -206,17 +191,12 @@ actor {
     nextCommentId += 1;
   };
 
-  // Get all posts sorted by time
   public query ({ caller }) func getPosts() : async [Post] {
-    // Authorization: Any user including guests can view posts
-    // Filter out reported posts from public view
     let visiblePosts = mutablePosts.toArray().filter(func(p) { not p.reported });
     visiblePosts.sort();
   };
 
-  // Like a post
   public shared ({ caller }) func likePost(postId : Nat) : async () {
-    // Authorization: Only authenticated users can like posts
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can like posts");
     };
@@ -245,9 +225,7 @@ actor {
     mutablePosts.addAll(updatedPosts.values());
   };
 
-  // Like a comment
   public shared ({ caller }) func likeComment(postId : Nat, commentId : Nat) : async () {
-    // Authorization: Only authenticated users can like comments
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can like comments");
     };
@@ -292,12 +270,31 @@ actor {
     mutablePosts.addAll(updatedPosts.values());
   };
 
-  // Reporter management
+  // New delete post functionality
+  public shared ({ caller }) func deletePost(postId : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can delete posts");
+    };
+
+    switch (mutablePosts.toArray().find(func(p) { p.id == postId })) {
+      case (?targetPost) {
+        if (targetPost.authorId != caller) {
+          Runtime.trap("Unauthorized: Only post author can delete this post.");
+        };
+        let filteredPosts = mutablePosts.toArray().filter(
+          func(p) { p.id != postId }
+        );
+        mutablePosts.clear();
+        mutablePosts.addAll(filteredPosts.values());
+      };
+      case (null) { Runtime.trap("Post not found") };
+    };
+  };
+
   let reportersMap = Map.empty<Principal, Map.Map<Principal, Nat>>();
   let postsReported = Map.empty<Nat, Nat>();
 
   public shared ({ caller }) func reportPost(postId : Nat) : async () {
-    // Authorization: Only authenticated users can report posts
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can report posts");
     };
@@ -323,7 +320,7 @@ actor {
             timestamp = p.timestamp;
             likes = p.likes;
             comments = p.comments;
-            reported = true; // Mark as reported
+            reported = true;
           };
         } else {
           p;
@@ -336,17 +333,14 @@ actor {
   };
 
   public shared ({ caller }) func reportUser(reportedUser : Principal) : async () {
-    // Authorization: Only authenticated users can report other users
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can report accounts");
     };
 
-    // Cannot report yourself
     if (caller == reportedUser) {
       Runtime.trap("Cannot report your own account");
     };
 
-    // Get or create reporters map for the reported user
     let existingReporters = switch (reportersMap.get(reportedUser)) {
       case (?map) { map };
       case (null) {
@@ -355,30 +349,25 @@ actor {
       };
     };
 
-    // Track distinct reporters (each reporter counts once)
     if (existingReporters.get(caller) == null) {
       existingReporters.add(caller, 1);
       reportersMap.add(reportedUser, existingReporters);
     };
 
-    // Count distinct reporters
     let distinctReporters = existingReporters.size();
     let reportThreshold = 5;
 
-    // Apply suspension if threshold reached
     if (distinctReporters >= reportThreshold) {
       switch (userProfiles.get(reportedUser)) {
         case (?profile) {
-          let suspensionPeriod = 7 * 24 * 60 * 60 * 1_000_000_000; // 7 days in nanoseconds
+          let suspensionPeriod = 7 * 24 * 60 * 60 * 1_000_000_000;
           let updatedProfile = {
             name = profile.name;
             accountSuspendedUntil = ?(Time.now() + suspensionPeriod);
           };
           userProfiles.add(reportedUser, updatedProfile);
         };
-        case (null) {
-          // User doesn't have a profile yet, cannot suspend
-        };
+        case (null) {};
       };
     };
   };

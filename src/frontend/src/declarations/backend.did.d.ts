@@ -69,6 +69,7 @@ export interface _SERVICE {
   'addComment' : ActorMethod<[bigint, string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createPost' : ActorMethod<[string, [] | [ExternalBlob]], undefined>,
+  'deletePost' : ActorMethod<[bigint], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getPosts' : ActorMethod<[], Array<Post>>,

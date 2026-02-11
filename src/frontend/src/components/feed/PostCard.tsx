@@ -3,13 +3,14 @@ import type { Post } from '../../backend';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Heart, MessageCircle, MoreVertical, Flag } from 'lucide-react';
+import { Heart, MessageCircle, MoreVertical, Flag, Trash2 } from 'lucide-react';
 import { formatTimestamp } from '../../utils/timeFormat';
 import { useLikePost } from '../../hooks/useQueries';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import CommentsThread from './CommentsThread';
 import ReportPostDialog from '../reporting/ReportPostDialog';
 import ReportAccountDialog from '../reporting/ReportAccountDialog';
+import DeletePostDialog from './DeletePostDialog';
 
 interface PostCardProps {
   post: Post;
@@ -20,6 +21,7 @@ export default function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [showReportPost, setShowReportPost] = useState(false);
   const [showReportAccount, setShowReportAccount] = useState(false);
+  const [showDeletePost, setShowDeletePost] = useState(false);
   const likePostMutation = useLikePost();
 
   const isOwnPost = identity?.getPrincipal().toString() === post.authorId.toString();
@@ -38,25 +40,32 @@ export default function PostCard({ post }: PostCardProps) {
               <p className="text-sm text-muted-foreground">{formatTimestamp(post.timestamp)}</p>
             </div>
             
-            {!isOwnPost && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setShowReportPost(true)}>
-                    <Flag className="mr-2 h-4 w-4" />
-                    Report Post
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {isOwnPost ? (
+                  <DropdownMenuItem onClick={() => setShowDeletePost(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Post
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowReportAccount(true)}>
-                    <Flag className="mr-2 h-4 w-4" />
-                    Report Account
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => setShowReportPost(true)}>
+                      <Flag className="mr-2 h-4 w-4" />
+                      Report Post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowReportAccount(true)}>
+                      <Flag className="mr-2 h-4 w-4" />
+                      Report Account
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
 
@@ -110,6 +119,12 @@ export default function PostCard({ post }: PostCardProps) {
           {showComments && <CommentsThread post={post} />}
         </CardContent>
       </Card>
+
+      <DeletePostDialog
+        open={showDeletePost}
+        onOpenChange={setShowDeletePost}
+        postId={post.id}
+      />
 
       <ReportPostDialog
         open={showReportPost}

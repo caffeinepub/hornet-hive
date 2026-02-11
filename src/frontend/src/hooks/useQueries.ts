@@ -81,6 +81,21 @@ export function useCreatePost() {
   });
 }
 
+export function useDeletePost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.deletePost(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+}
+
 export function useLikePost() {
   const { actor } = useActor();
   const queryClient = useQueryClient();

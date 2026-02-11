@@ -1,6 +1,6 @@
 {
   "frontend/src/App.tsx": "Main application component that handles authentication flow, username setup, and page navigation between Feed, Create Post, Notifications, Polls, and Profile screens.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles, posts, comments, likes, and reporting functionality with automatic cache invalidation.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles, posts, comments, likes, reporting, and the new delete post functionality with automatic cache invalidation.",
   "frontend/src/hooks/useSuspensionStatus.ts": "Hook that derives whether the current user is suspended and until when, used to disable posting/commenting UI.",
   "frontend/src/moderation/disallowedTerms.ts": "Deterministic list of disallowed terms and text normalization functions for consistent username and content moderation.",
   "frontend/src/moderation/validateUsername.ts": "Username validation logic checking length, character set, and disallowed terms with clear error messages.",
@@ -17,17 +17,20 @@
   "frontend/src/components/profile/UsernameSetupModal.tsx": "Modal dialog for first-time username setup with validation and error handling.",
   "frontend/src/components/layout/AppShell.tsx": "Main app layout with header (logo, title, notifications bell), content area, and bottom navigation.",
   "frontend/src/components/nav/BottomNav.tsx": "Mobile-first bottom navigation bar with tabs for Feed, Post, Polls, and Profile.",
-  "frontend/src/components/feed/PostCard.tsx": "Post display component with author info, content, optional image, like/comment actions, and report menu.",
+  "frontend/src/components/feed/PostCard.tsx": "Post display component with author info, content, optional image, like/comment actions, and conditional overflow menu showing delete option for own posts or report actions for others.",
   "frontend/src/components/feed/CommentsThread.tsx": "Comments list and add-comment form with like functionality and suspension status handling.",
   "frontend/src/components/reporting/ReportPostDialog.tsx": "Confirmation dialog for reporting posts with anonymous notification handling.",
   "frontend/src/components/reporting/ReportAccountDialog.tsx": "Confirmation dialog for reporting user accounts with 5-report threshold explanation.",
-  "frontend/src/pages/FeedPage.tsx": "Main feed page displaying posts in reverse chronological order with refresh functionality.",
+  "frontend/src/pages/FeedPage.tsx": "Main feed page displaying posts in reverse chronological order with inline weekly poll panel at the top and refresh functionality.",
   "frontend/src/pages/CreatePostPage.tsx": "Post creation page with text input, optional image upload, validation, and suspension status handling.",
   "frontend/src/pages/NotificationsPage.tsx": "Notifications center displaying moderation/reporting notices in reverse chronological order.",
-  "frontend/src/pages/PollsPage.tsx": "Weekly poll page with voting UI (Friday only), results display (Saturday+), and state-based messaging.",
+  "frontend/src/pages/PollsPage.tsx": "Weekly poll page that renders the shared WeeklyPollPanel component with full layout and messaging.",
   "frontend/src/pages/ProfilePage.tsx": "User profile page showing username, suspension status, account info, and logout button with footer attribution.",
   "frontend/src/index.css": "Global styles with Kelly-green OKLCH color system for light/dark modes and mobile-first responsive utilities.",
   "frontend/tailwind.config.js": "Tailwind configuration with Kelly-green color tokens, custom border radius, and mobile-first container settings.",
   "frontend/index.html": "HTML entry point with mobile viewport settings, theme color, and manifest reference for PWA support.",
-  "frontend/public/manifest.webmanifest": "Web app manifest for installable PWA experience with Hornet Hive branding and Kelly-green theme."
+  "frontend/public/manifest.webmanifest": "Web app manifest for installable PWA experience with Hornet Hive branding and Kelly-green theme.",
+  "frontend/src/polls/useWeeklyPoll.ts": "Shared React hook that encapsulates weekly poll behavior including poll creation, voting, and state management using existing poll time window and localStorage logic.",
+  "frontend/src/components/polls/WeeklyPollPanel.tsx": "Reusable weekly poll UI component that displays voting interface, results, and informational states with optional compact mode for inline display.",
+  "frontend/src/components/feed/DeletePostDialog.tsx": "Confirmation dialog component for deleting posts using AlertDialog with permanent deletion warning and error handling via toast notifications."
 }

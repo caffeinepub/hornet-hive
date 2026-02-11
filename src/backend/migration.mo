@@ -1,43 +1,10 @@
-import Map "mo:core/Map";
-import List "mo:core/List";
 import Set "mo:core/Set";
+import List "mo:core/List";
 import Nat "mo:core/Nat";
-import Principal "mo:core/Principal";
 import Storage "blob-storage/Storage";
 
 module {
-  type OldComment = {
-    id : Nat;
-    authorName : Text;
-    authorId : Principal;
-    content : Text;
-    likes : Nat;
-    timestamp : Int;
-    reported : Bool;
-  };
-
-  type OldPost = {
-    id : Nat;
-    authorName : Text;
-    authorId : Principal;
-    content : Text;
-    image : ?Storage.ExternalBlob;
-    timestamp : Int;
-    likes : Nat;
-    comments : [OldComment];
-    reported : Bool;
-  };
-
-  type OldActor = {
-    userProfiles : Map.Map<Principal, { name : Text; accountSuspendedUntil : ?Int }>;
-    mutablePosts : List.List<OldPost>;
-    nextPostId : Nat;
-    nextCommentId : Nat;
-    reportersMap : Map.Map<Principal, Map.Map<Principal, Nat>>;
-    postsReported : Map.Map<Nat, Nat>;
-  };
-
-  type NewComment = {
+  type Comment = {
     id : Nat;
     authorName : Text;
     authorId : Principal;
@@ -48,6 +15,18 @@ module {
     likedBy : Set.Set<Principal>;
   };
 
+  type OldPost = {
+    id : Nat;
+    authorName : Text;
+    authorId : Principal;
+    content : Text;
+    image : ?Storage.ExternalBlob;
+    timestamp : Int;
+    likes : Nat;
+    comments : [Comment];
+    reported : Bool;
+  };
+
   type NewPost = {
     id : Nat;
     authorName : Text;
@@ -56,31 +35,27 @@ module {
     image : ?Storage.ExternalBlob;
     timestamp : Int;
     likes : Nat;
-    comments : [NewComment];
+    comments : [Comment];
     reported : Bool;
+    likedBy : Set.Set<Principal>;
+  };
+
+  type OldActor = {
+    mutablePosts : List.List<OldPost>;
+    nextPostId : Nat;
+    nextCommentId : Nat;
   };
 
   type NewActor = {
-    userProfiles : Map.Map<Principal, { name : Text; accountSuspendedUntil : ?Int }>;
     mutablePosts : List.List<NewPost>;
     nextPostId : Nat;
     nextCommentId : Nat;
-    reportersMap : Map.Map<Principal, Map.Map<Principal, Nat>>;
-    postsReported : Map.Map<Nat, Nat>;
   };
 
   public func run(old : OldActor) : NewActor {
     let newPosts = old.mutablePosts.map<OldPost, NewPost>(
       func(oldPost) {
-        let newComments = oldPost.comments.map(
-          func(oldComment) {
-            {
-              oldComment with
-              likedBy = Set.empty<Principal>() // All old comments start empty
-            }
-          }
-        );
-        { oldPost with comments = newComments };
+        { oldPost with likedBy = Set.empty<Principal>() };
       }
     );
     { old with mutablePosts = newPosts };

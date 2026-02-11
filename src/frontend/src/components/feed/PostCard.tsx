@@ -11,6 +11,7 @@ import CommentsThread from './CommentsThread';
 import ReportPostDialog from '../reporting/ReportPostDialog';
 import ReportAccountDialog from '../reporting/ReportAccountDialog';
 import DeletePostDialog from './DeletePostDialog';
+import { toast } from 'sonner';
 
 interface PostCardProps {
   post: PostView;
@@ -22,12 +23,27 @@ export default function PostCard({ post }: PostCardProps) {
   const [showReportPost, setShowReportPost] = useState(false);
   const [showReportAccount, setShowReportAccount] = useState(false);
   const [showDeletePost, setShowDeletePost] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
   const likePostMutation = useLikePost();
 
   const isOwnPost = identity?.getPrincipal().toString() === post.authorId.toString();
 
-  const handleLike = () => {
-    likePostMutation.mutate(post.id);
+  const handleLike = async () => {
+    setIsLiking(true);
+    try {
+      await likePostMutation.mutateAsync(post.id);
+    } catch (error: any) {
+      const errorMessage = error?.message || String(error);
+      
+      // Check if this is a duplicate like error
+      if (errorMessage.toLowerCase().includes('already liked')) {
+        toast.error('You have already liked this post.');
+      } else {
+        toast.error('Failed to like post. Please try again.');
+      }
+    } finally {
+      setIsLiking(false);
+    }
   };
 
   return (
@@ -98,7 +114,7 @@ export default function PostCard({ post }: PostCardProps) {
               size="sm"
               className="gap-2"
               onClick={handleLike}
-              disabled={likePostMutation.isPending}
+              disabled={isLiking}
             >
               <Heart className="h-4 w-4" />
               <span>{Number(post.likes)}</span>

@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-surface-duplicate-like-errors-in-the-ui-when-liking-a-comment-showing-an-english-user-facing-message-rather-than-failing-silently",
-      "featureTitle": "Surface duplicate-like errors in the UI when liking a comment, showing an English user-facing message rather than failing silently.",
+      "featureId": "feature-update-the-frontend-post-like-ui-to-gracefully-handle-a-duplicate-like-attempt-by-showing-an-english-user-facing-message-instead-of-failing-silently",
+      "featureTitle": "Update the frontend post-like UI to gracefully handle a duplicate-like attempt by showing an English user-facing message instead of failing silently.",
       "files": [
-        "frontend/src/components/feed/CommentsThread.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/feed/PostCard.tsx"
       ],
       "components": [
         "authorization@4.0.0",

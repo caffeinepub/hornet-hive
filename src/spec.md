@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Prevent the same authenticated student from liking the same comment more than once, and show a clear error message in the UI when a duplicate like is attempted.
+**Goal:** Prevent the same authenticated student from liking the same post more than once, and show a clear message when a duplicate like is attempted.
 
 **Planned changes:**
-- Backend: Enforce a one-like-per-student-per-comment rule for comment likes so repeated like attempts by the same caller do not increment the like count.
-- Backend: Return a clear English error message when a duplicate comment-like is attempted (e.g., "You have already liked this comment.").
-- Frontend: Display the backend’s duplicate-like error message to the user (e.g., toast/inline alert) without breaking overall UI responsiveness.
+- Update backend like handling to enforce one-like-per-student-per-post with persisted per-post like ownership tracking and a deterministic “already liked” error on duplicates.
+- Add/extend conditional migration/upgrade logic so existing persisted posts initialize the new liked-by tracking without breaking `getPosts` or `likePost`.
+- Update the frontend Like interaction to handle duplicate-like rejections by showing an English user-facing message and resetting the button/loading state; show a generic English error for other failures.
 
-**User-visible outcome:** A student can like a comment once; if they try to like the same comment again, they see an English message indicating they already liked it, and they can continue using the app normally.
+**User-visible outcome:** When a student taps Like on the same post multiple times, the like count only increases once and the app informs them they have already liked the post.

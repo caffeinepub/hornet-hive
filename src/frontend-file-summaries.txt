@@ -1,6 +1,6 @@
 {
   "frontend/src/App.tsx": "Main application component with authentication flow, username setup, app-level bootstrap watchdog that prevents endless spinner by showing error screen after 12 seconds, proper retry logic that resets all timeout/watchdog state and invalidates actor query, and page navigation handling all bootstrap states.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including comment like mutation with proper error handling that doesn't invalidate cache on error, allowing components to handle duplicate-like failures gracefully.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including post and comment like mutations with proper error handling that doesn't invalidate cache on error, allowing components to handle duplicate-like failures gracefully.",
   "frontend/src/hooks/useSuspensionStatus.ts": "Hook that derives whether the current user is suspended and until when, used to disable posting/commenting UI.",
   "frontend/src/moderation/disallowedTerms.ts": "Deterministic list of disallowed terms and text normalization functions for consistent username and content moderation.",
   "frontend/src/moderation/validateUsername.ts": "Username validation logic checking length, character set, and disallowed terms with clear error messages.",
@@ -17,7 +17,7 @@
   "frontend/src/components/profile/UsernameSetupModal.tsx": "Modal dialog for first-time username setup with validation and error handling.",
   "frontend/src/components/layout/AppShell.tsx": "Main app layout with header (logo, title, share button, notifications bell with unread badge), content area, and bottom navigation.",
   "frontend/src/components/nav/BottomNav.tsx": "Mobile-first bottom navigation bar with tabs for Feed, Post, Polls, and Profile.",
-  "frontend/src/components/feed/PostCard.tsx": "Post display component with author info, content, optional image, like/comment actions, and conditional overflow menu showing delete option for own posts or report actions for others.",
+  "frontend/src/components/feed/PostCard.tsx": "Post display component with author info, content, optional image, like/comment actions with async error handling and toast notifications for duplicate likes, and conditional overflow menu showing delete option for own posts or report actions for others.",
   "frontend/src/components/feed/CommentsThread.tsx": "Comments list and add-comment form with like functionality using async error handling, toast notifications for duplicate likes, per-comment loading state, suspension status handling, delete button for own comments, and report button for other users' comments.",
   "frontend/src/components/reporting/ReportPostDialog.tsx": "Confirmation dialog for reporting posts with anonymous notification handling.",
   "frontend/src/components/reporting/ReportAccountDialog.tsx": "Confirmation dialog for reporting user accounts with 5-report threshold explanation.",

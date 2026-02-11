@@ -1,45 +1,77 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T14:28:28.267Z",
-  "summary": "Backend changes add a per-comment `likedBy` set and a migration module, and frontend changes show a toast on duplicate-like errors. However, the diff summary does not provide evidence that `likeComment(postId, commentId)` now enforces the one-like-per-caller rule with a clear English trap message and no likes increment on repeat calls.",
+  "generatedAt": "2026-02-11T15:27:27.341Z",
+  "summary": "Diff adds per-post likedBy tracking types and a migration module, and updates the PostCard UI to toast on duplicate-like errors. However, the backend likePost enforcement and deterministic duplicate-like error message are not evidenced in the provided diff summary (backend/main.mo is truncated before likePost). The diff also appears to introduce several unrelated backend/frontend features (profiles, moderation, notifications, polls, suspension) that were not requested.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Enforce a one-like-per-student-per-comment rule in the backend so the same authenticated caller cannot successfully like the same comment more than once (including trapping with a clear English message on duplicates and not incrementing likes).",
-      "reason": "The diff summary shows new data structures (`likedBy : Set.Set<Principal>`) and a migration initializing it, but does not show any implementation/changes to the `likeComment(postId, commentId)` method logic (e.g., checking `likedBy`, preventing increment, and trapping with an English message). With the backend file truncated, enforcement cannot be verified from the provided evidence.",
+      "requirement": "Enforce a one-like-per-student-per-post rule in the backend so the same authenticated caller cannot successfully like the same post more than once, and return a deterministic error message containing the phrase \"already liked\" on duplicate like attempts.",
+      "reason": "The diff shows the new `likedBy` field added to `Post` and a migration module, but the likePost implementation and its duplicate-like rejection/error message are not present in the visible (truncated) backend/main.mo excerpt, so enforcement and the deterministic error text cannot be verified from this summary.",
       "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo"
+        "backend/main.mo (truncated; shows Post has likedBy but no likePost implementation visible)",
+        "backend/migration.mo (adds likedBy initialization but does not enforce like rules)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Weekly poll topic extraction utility (top-10 topics frequency analysis) added to the frontend.",
-      "reason": "Not requested by the BuildRequest, which is scoped to preventing duplicate comment likes and surfacing the resulting errors in the UI.",
+      "description": "Backend user profile management (setUniqueUsername, getCallerUserProfile, getUserProfile, saveCallerUserProfile) and accountSuspendedUntil field.",
+      "reason": "Not requested by the BuildRequest, which only targets preventing duplicate post likes and related migration/UI error handling.",
       "evidence": [
-        "frontend/src/polls/extractWeeklyTopics.ts"
+        "backend/main.mo (truncated; shows UserProfile, setUniqueUsername, getCallerUserProfile, getUserProfile, saveCallerUserProfile)"
       ]
     },
     {
-      "description": "State migration module and actor migration wiring added.",
-      "reason": "The BuildRequest did not ask for state migrations; it only required enforcing duplicate-like prevention. Adding a migration module may be useful but is not explicitly requested.",
+      "description": "Frontend bootstrap watchdog / endless spinner prevention and retry/reset logic in the app shell.",
+      "reason": "Not requested by REQ-1/2/3 and unrelated to duplicate post-like handling.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo"
+        "frontend-file-summaries.txt (\"frontend/src/App.tsx\": bootstrap watchdog, error screen after 12 seconds, retry logic)"
+      ]
+    },
+    {
+      "description": "Suspension-status hook and UI behavior tied to user suspensions.",
+      "reason": "BuildRequest does not mention account suspensions or disabling posting/commenting based on suspension state.",
+      "evidence": [
+        "frontend-file-summaries.txt (\"frontend/src/hooks/useSuspensionStatus.ts\": suspension derived state used to disable UI)"
+      ]
+    },
+    {
+      "description": "Content/username moderation features (disallowed terms list, validateUsername, validateTextContent).",
+      "reason": "Not part of the requested like-duplication prevention work.",
+      "evidence": [
+        "frontend-file-summaries.txt (\"frontend/src/moderation/disallowedTerms.ts\", \"frontend/src/moderation/validateUsername.ts\", \"frontend/src/moderation/validateTextContent.ts\")"
+      ]
+    },
+    {
+      "description": "Image upload validation/constants (allowed MIME types, max file size, imageFileValidation utility).",
+      "reason": "Not requested for the duplicate-like feature.",
+      "evidence": [
+        "frontend-file-summaries.txt (\"frontend/src/constants/uploads.ts\", \"frontend/src/utils/imageFileValidation.ts\")"
+      ]
+    },
+    {
+      "description": "Notification system types and LocalStorage-backed notification persistence.",
+      "reason": "Not requested by the BuildRequest.",
+      "evidence": [
+        "frontend-file-summaries.txt (\"frontend/src/notifications/notificationTypes.ts\", \"frontend/src/notifications/localNotificationsStore.ts\")"
+      ]
+    },
+    {
+      "description": "Local poll system (time windows, topic extraction, local poll store).",
+      "reason": "Not requested by the BuildRequest.",
+      "evidence": [
+        "frontend-file-summaries.txt (\"frontend/src/polls/pollTimeWindow.ts\", \"frontend/src/polls/extractWeeklyTopics.ts\", \"frontend/src/polls/localPollStore.ts\")"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.63,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/feed/CommentsThread.tsx",
     "frontend/src/components/feed/PostCard.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/polls/extractWeeklyTopics.ts",
     "project_state.json"
   ]
 }

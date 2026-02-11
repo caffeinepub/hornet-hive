@@ -2,15 +2,15 @@
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
   "summary": "New project",
-  "architectural_notes": [
-    "Enforce uniqueness for comment likes: (student_id, comment_id) must be unique to prevent multiple likes by the same student on the same comment."
+  "architectural_notes": [],
+  "known_issues": [
+    "Current like behavior may allow the same student to like the same post multiple times."
   ],
-  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-surface-duplicate-like-errors-in-the-ui-when-liking-a-comment-showing-an-english-user-facing-message-rather-than-failing-silently",
-      "title": "Surface duplicate-like errors in the UI when liking a comment, showing an English user-facing message rather than failing silently.",
+      "id": "feature-update-the-frontend-post-like-ui-to-gracefully-handle-a-duplicate-like-attempt-by-showing-an-english-user-facing-message-instead-of-failing-silently",
+      "title": "Update the frontend post-like UI to gracefully handle a duplicate-like attempt by showing an English user-facing message instead of failing silently.",
       "reqIds": [
         "REQ-2"
       ],
@@ -20,20 +20,28 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Prevent a student from liking the same comment multiple times (enforce one like per student per comment).",
+      "summary": "Prevent a student from liking the same post multiple times (enforce one-like-per-student-per-post).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Enforce a one-like-per-student-per-comment rule in the backend so the same authenticated caller cannot successfully like the same comment more than once.",
+      "summary": "Enforce a one-like-per-student-per-post rule in the backend so the same authenticated caller cannot successfully like the same post more than once.",
       "reqIds": [
         "REQ-1"
       ],
       "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "If existing persisted post data must be upgraded, add/extend conditional migration logic so existing posts initialize the new per-post liked-by tracking without breaking getPosts or likePost.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
     }
   ],
-  "projectName": "Prevent duplicate likes on the same comment by the same student",
+  "projectName": "Prevent the same student from liking the same post multiple times",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

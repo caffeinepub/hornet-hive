@@ -1,25 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Show duplicate comment-like errors in UI",
+  "title": "Handle duplicate post likes gracefully in the UI",
   "requirements": [
     {
       "id": "REQ-2",
-      "summary": "Display a clear English UI error when the backend rejects a duplicate like on a comment, without breaking interaction with the feed.",
+      "summary": "Show a user-facing message when the backend rejects a duplicate post-like, and ensure the Like button exits loading state.",
       "acceptanceCriteria": [
-        "If the backend rejects a duplicate comment-like attempt, the user sees an English error message (e.g., via toast or an inline alert) indicating they already liked the comment.",
-        "The UI remains responsive after the error (the user can continue browsing/liking other comments)."
+        "When a user taps Like on the same post more than once and the backend rejects it, the UI shows a toast (or equivalent) stating the user has already liked the post.",
+        "The Like button returns to a non-loading state after the duplicate-like attempt completes.",
+        "Non-duplicate errors during post like show a generic English error message (e.g., \"Failed to like post. Please try again.\")."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/feed/CommentsThread.tsx",
+          "path": "frontend/src/components/feed/PostCard.tsx",
           "operation": "modify",
-          "description": "Handle errors from liking a comment by switching to an async like handler (e.g., mutateAsync + try/catch) and surfacing a user-facing English message when the call fails; map the backend duplicate-like trap message to a stable English message such as \"You have already liked this comment.\" and ensure the rest of the thread remains usable after the error."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Adjust the comment-like mutation behavior to support UI error surfacing (e.g., ensure errors are not swallowed and that cache invalidation only happens on success) so that duplicate-like failures can be displayed reliably while keeping the UI responsive."
+          "description": "Update the post Like handler to use an awaited mutation (e.g., mutateAsync) with try/catch and show toast feedback using the existing Sonner toast system: if the caught error message contains \"already liked\" (or similar duplicate-like indicator), show an English message like \"You have already liked this post.\"; otherwise show a generic message like \"Failed to like post. Please try again.\" Ensure the Like button is re-enabled after completion (success or error) by relying on mutation pending state and/or an explicit local loading flag."
         }
       ]
     }

@@ -180,6 +180,10 @@ export function useLikePost() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
+    // Don't invalidate on error - let the component handle it
+    onError: () => {
+      // Error is handled in the component
+    },
   });
 }
 

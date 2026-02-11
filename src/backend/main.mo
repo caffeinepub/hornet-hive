@@ -14,6 +14,7 @@ import MixinStorage "blob-storage/Mixin";
 import Set "mo:core/Set";
 import Migration "migration";
 
+// Integrate migration module for data persistence
 (with migration = Migration.run)
 actor {
   // Integrate storage and authentication modules
@@ -103,6 +104,7 @@ actor {
     likes : Nat;
     comments : [Comment];
     reported : Bool;
+    likedBy : Set.Set<Principal>; // Track who liked each post.
   };
 
   type PostView = {
@@ -159,6 +161,7 @@ actor {
       likes = 0;
       comments = [];
       reported = false;
+      likedBy = Set.empty<Principal>();
     };
 
     mutablePosts.add(newPost);
@@ -208,6 +211,7 @@ actor {
             likes = p.likes;
             comments = p.comments.concat([comment]);
             reported = p.reported;
+            likedBy = p.likedBy;
           };
         } else {
           p;
@@ -261,6 +265,7 @@ actor {
               likes = post.likes;
               comments = updatedCommentsList.toArray();
               reported = post.reported;
+              likedBy = post.likedBy;
             };
 
             // Update posts array by constructing a new array
@@ -317,6 +322,7 @@ actor {
               likes = post.likes;
               comments = updatedComments;
               reported = post.reported;
+              likedBy = post.likedBy;
             };
 
             let updatedPostsArray = postsArray.toVarArray<Post>();
@@ -366,27 +372,28 @@ actor {
     postsWithFilteredComments;
   };
 
+  // Only allow one like per user per post.
   public shared ({ caller }) func likePost(postId : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can like posts");
     };
 
+    let updateLikeStatus = func(post : Post, caller : Principal) : Post {
+      if (post.likedBy.contains(caller)) {
+        post; // No change if caller already liked
+      } else {
+        let newLikedBy = post.likedBy.clone();
+        newLikedBy.add(caller);
+        { post with likes = post.likes + 1; likedBy = newLikedBy };
+      };
+    };
+
     let updatedPosts = mutablePosts.toArray().map(
-      func(p) {
-        if (p.id == postId) {
-          {
-            id = p.id;
-            authorName = p.authorName;
-            authorId = p.authorId;
-            content = p.content;
-            image = p.image;
-            timestamp = p.timestamp;
-            likes = p.likes + 1;
-            comments = p.comments;
-            reported = p.reported;
-          };
+      func(post) {
+        if (post.id == postId) {
+          updateLikeStatus(post, caller);
         } else {
-          p;
+          post;
         };
       }
     );
@@ -486,6 +493,7 @@ actor {
             likes = p.likes;
             comments = p.comments;
             reported = true;
+            likedBy = p.likedBy;
           };
         } else {
           p;

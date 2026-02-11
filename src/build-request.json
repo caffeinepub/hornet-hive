@@ -1,54 +1,70 @@
 {
   "kind": "build_request",
-  "title": "Prevent duplicate likes on the same comment by the same student",
+  "title": "Prevent the same student from liking the same post multiple times",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Enforce a one-like-per-student-per-comment rule in the backend so the same authenticated caller cannot successfully like the same comment more than once.",
+      "text": "Enforce a one-like-per-student-per-post rule in the backend so the same authenticated caller cannot successfully like the same post more than once.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages-8"
+          "recent-messages"
         ],
         "quotes": [
-          "Make it so that the same student cannot like the same comment multiple times."
+          "Make it so that the same student cannot like the same post multiple times."
         ]
       },
       "acceptanceCriteria": [
-        "Calling likeComment(postId, commentId) the first time increments that comment's likes by exactly 1.",
-        "Calling likeComment(postId, commentId) again from the same caller does not change the comment's likes count.",
-        "The second (and subsequent) like attempts from the same caller for the same comment return a clear error (trap) message in English (e.g., \"You have already liked this comment.\").",
-        "Different authenticated callers can each like the same comment once, and each successful like increments the likes count by 1."
+        "Given a post, when the same authenticated principal calls likePost(postId) twice, the post’s like count increases by at most 1 total.",
+        "The backend stores per-post like ownership (who liked) so the rule is enforced even if the user refreshes or retries.",
+        "The backend returns a deterministic error message when a duplicate like is attempted (e.g., contains the phrase \"already liked\")."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Surface duplicate-like errors in the UI when liking a comment, showing an English user-facing message rather than failing silently.",
+      "text": "Update the frontend post-like UI to gracefully handle a duplicate-like attempt by showing an English user-facing message instead of failing silently.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-8"
+          "recent-messages"
         ],
         "quotes": [
-          "Make it so that the same student cannot like the same comment multiple times."
+          "Make it so that the same student cannot like the same post multiple times."
         ]
       },
       "acceptanceCriteria": [
-        "If the backend rejects a duplicate comment-like attempt, the user sees an English error message (e.g., via toast or an inline alert) indicating they already liked the comment.",
-        "The UI remains responsive after the error (the user can continue browsing/liking other comments)."
+        "When a user taps Like on the same post more than once and the backend rejects it, the UI shows a toast (or equivalent) stating the user has already liked the post.",
+        "The Like button returns to a non-loading state after the duplicate-like attempt completes.",
+        "Non-duplicate errors during post like show a generic English error message (e.g., \"Failed to like post. Please try again.\")."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "If existing persisted post data must be upgraded, add/extend conditional migration logic so existing posts initialize the new per-post liked-by tracking without breaking getPosts or likePost.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "Make it so that the same student cannot like the same post multiple times."
+        ]
+      },
+      "acceptanceCriteria": [
+        "After upgrade/migration, existing posts remain readable via getPosts.",
+        "After upgrade/migration, likePost works for posts created before the upgrade and still enforces one-like-per-student-per-post."
       ]
     }
   ],
   "constraints": [
     "Backend must remain a single Motoko actor in backend/main.mo.",
-    "Do not edit files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
-    "Use English for any user-facing text."
+    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Implementing unlike/toggle-like behavior for comments.",
-    "Preventing duplicate likes on posts (only comments are in scope).",
-    "Adding real-time updates beyond existing React Query invalidation/polling behavior."
+    "Add an \"unlike\" feature or toggle-like behavior for posts.",
+    "Change the existing comment-like behavior beyond what is necessary to keep it working.",
+    "Display per-user liked state (e.g., filled heart) for posts unless already available without adding new backend fields to PostView."
   ],
   "imageRequirements": {
     "required": [],

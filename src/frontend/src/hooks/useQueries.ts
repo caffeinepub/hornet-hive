@@ -3,24 +3,81 @@ import { useActor } from './useActor';
 import type { Post, UserProfile } from '../backend';
 import { ExternalBlob } from '../backend';
 import { Principal } from '@dfinity/principal';
+import { useEffect, useState, useRef } from 'react';
+import { withTimeout } from '../utils/withTimeout';
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
+  const [actorTimeout, setActorTimeout] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Set a timeout for actor initialization - starts whenever actor is null
+  useEffect(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (!actor) {
+      // Start countdown whenever actor is not available
+      timerRef.current = setTimeout(() => {
+        setActorTimeout(true);
+      }, 8000); // 8 second timeout
+    } else {
+      // Actor is available, clear timeout state
+      setActorTimeout(false);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [actor]);
 
   const query = useQuery<UserProfile | null>({
     queryKey: ['currentUserProfile'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getCallerUserProfile();
+      if (!actor) {
+        throw new Error('Unable to connect to the service. Please check your connection and try again.');
+      }
+      // Wrap the actor call with a timeout
+      return withTimeout(
+        actor.getCallerUserProfile(),
+        10000,
+        'Profile fetch timed out. Please try again.'
+      );
     },
-    enabled: !!actor && !actorFetching,
-    retry: false,
+    // Enable the query if:
+    // 1. Actor is available and not fetching, OR
+    // 2. Actor timed out (so we can throw an error)
+    enabled: (!!actor && !actorFetching) || actorTimeout,
+    retry: (failureCount, error) => {
+      // Don't retry timeout or connection errors
+      if (error.message.includes('timed out') || error.message.includes('connect')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    staleTime: 0,
   });
+
+  // Reset timeout state when needed for retry
+  const resetTimeout = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setActorTimeout(false);
+  };
 
   return {
     ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
+    isLoading: (actorFetching || query.isLoading) && !actorTimeout,
+    isFetched: query.isFetched || (actorTimeout && query.isError),
+    resetTimeout,
   };
 }
 
@@ -89,6 +146,21 @@ export function useDeletePost() {
     mutationFn: async (postId: bigint) => {
       if (!actor) throw new Error('Actor not available');
       await actor.deletePost(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ postId, commentId }: { postId: bigint; commentId: bigint }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.deleteComment(postId, commentId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });

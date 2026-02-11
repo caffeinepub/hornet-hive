@@ -191,6 +191,63 @@ actor {
     nextCommentId += 1;
   };
 
+  public shared ({ caller }) func deleteComment(postId : Nat, commentId : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can delete comments");
+    };
+
+    let postsArray = mutablePosts.toArray();
+    let postIndex = postsArray.findIndex(func(p) { p.id == postId });
+
+    switch (postIndex) {
+      case (?idx) {
+        let post = postsArray[idx];
+        let commentIndex = post.comments.findIndex(func(c) { c.id == commentId });
+
+        switch (commentIndex) {
+          case (?cIdx) {
+            let comment = post.comments[cIdx];
+            if (comment.authorId != caller) {
+              Runtime.trap("Unauthorized: Only comment author can delete this comment.");
+            };
+
+            let commentsList = List.fromArray<Comment>(post.comments);
+            let updatedCommentsList = List.empty<Comment>();
+
+            var currentIndex = 0;
+            for (c in commentsList.values()) {
+              if (currentIndex != cIdx) {
+                updatedCommentsList.add(c);
+              };
+              currentIndex += 1;
+            };
+
+            let updatedPost : Post = {
+              id = post.id;
+              authorName = post.authorName;
+              authorId = post.authorId;
+              content = post.content;
+              image = post.image;
+              timestamp = post.timestamp;
+              likes = post.likes;
+              comments = updatedCommentsList.toArray();
+              reported = post.reported;
+            };
+
+            // Update posts array by constructing a new array
+            let updatedPostsArray = postsArray.toVarArray<Post>();
+            updatedPostsArray[idx] := updatedPost;
+
+            mutablePosts.clear();
+            mutablePosts.addAll(updatedPostsArray.toArray().values());
+          };
+          case (null) { Runtime.trap("Comment not found") };
+        };
+      };
+      case (null) { Runtime.trap("Post not found") };
+    };
+  };
+
   public query ({ caller }) func getPosts() : async [Post] {
     let visiblePosts = mutablePosts.toArray().filter(func(p) { not p.reported });
     visiblePosts.sort();
@@ -270,7 +327,6 @@ actor {
     mutablePosts.addAll(updatedPosts.values());
   };
 
-  // New delete post functionality
   public shared ({ caller }) func deletePost(postId : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can delete posts");

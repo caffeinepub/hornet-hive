@@ -1,6 +1,6 @@
 {
-  "frontend/src/App.tsx": "Main application component that handles authentication flow, username setup, and page navigation between Feed, Create Post, Notifications, Polls, and Profile screens.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles, posts, comments, likes, reporting, and the new delete post functionality with automatic cache invalidation.",
+  "frontend/src/App.tsx": "Main application component with authentication flow, username setup, app-level bootstrap watchdog that prevents endless spinner by showing error screen after 12 seconds, proper retry logic that resets all timeout/watchdog state and invalidates actor query, and page navigation handling all bootstrap states.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations with improved timeout handling that starts countdown whenever actor is null (regardless of fetching state), properly clears timers on cleanup and retry, and forces error state after timeout to prevent endless loading.",
   "frontend/src/hooks/useSuspensionStatus.ts": "Hook that derives whether the current user is suspended and until when, used to disable posting/commenting UI.",
   "frontend/src/moderation/disallowedTerms.ts": "Deterministic list of disallowed terms and text normalization functions for consistent username and content moderation.",
   "frontend/src/moderation/validateUsername.ts": "Username validation logic checking length, character set, and disallowed terms with clear error messages.",
@@ -15,10 +15,10 @@
   "frontend/src/polls/localPollStore.ts": "LocalStorage-based poll persistence with voting logic and Friday-only enforcement.",
   "frontend/src/components/auth/LoginScreen.tsx": "Login screen with Hornet Hive branding and Internet Identity sign-in button.",
   "frontend/src/components/profile/UsernameSetupModal.tsx": "Modal dialog for first-time username setup with validation and error handling.",
-  "frontend/src/components/layout/AppShell.tsx": "Main app layout with header (logo, title, notifications bell), content area, and bottom navigation.",
+  "frontend/src/components/layout/AppShell.tsx": "Main app layout with header (logo, title, share button, notifications bell with unread badge), content area, and bottom navigation.",
   "frontend/src/components/nav/BottomNav.tsx": "Mobile-first bottom navigation bar with tabs for Feed, Post, Polls, and Profile.",
   "frontend/src/components/feed/PostCard.tsx": "Post display component with author info, content, optional image, like/comment actions, and conditional overflow menu showing delete option for own posts or report actions for others.",
-  "frontend/src/components/feed/CommentsThread.tsx": "Comments list and add-comment form with like functionality and suspension status handling.",
+  "frontend/src/components/feed/CommentsThread.tsx": "Comments list and add-comment form with like functionality, suspension status handling, and delete button for own comments that opens confirmation dialog using Internet Identity principal comparison.",
   "frontend/src/components/reporting/ReportPostDialog.tsx": "Confirmation dialog for reporting posts with anonymous notification handling.",
   "frontend/src/components/reporting/ReportAccountDialog.tsx": "Confirmation dialog for reporting user accounts with 5-report threshold explanation.",
   "frontend/src/pages/FeedPage.tsx": "Main feed page displaying posts in reverse chronological order with inline weekly poll panel at the top and refresh functionality.",
@@ -33,5 +33,8 @@
   "frontend/src/polls/useWeeklyPoll.ts": "Shared React hook that encapsulates weekly poll behavior including poll creation, voting, and state management using existing poll time window and localStorage logic.",
   "frontend/src/components/polls/WeeklyPollPanel.tsx": "Reusable weekly poll UI component that displays voting interface, results, and informational states with optional compact mode for inline display.",
   "frontend/src/components/feed/DeletePostDialog.tsx": "Confirmation dialog component for deleting posts using AlertDialog with permanent deletion warning and error handling via toast notifications.",
-  "frontend/src/utils/shareHornetHive.ts": "Share utility that implements Web Share API with automatic fallback to clipboard (modern and legacy methods) for sharing the Hornet Hive app URL with friends."
+  "frontend/src/utils/shareHornetHive.ts": "Share utility that implements Web Share API with automatic fallback to clipboard (modern and legacy methods) for sharing the Hornet Hive app URL with friends.",
+  "frontend/src/components/auth/BootstrapErrorScreen.tsx": "Bootstrap error screen component that displays user-friendly English error messages including watchdog startup timeout case, with retry and logout actions and collapsible technical details section.",
+  "frontend/src/components/feed/DeleteCommentDialog.tsx": "Confirmation dialog component for deleting comments using AlertDialog with permanent deletion warning, toast notifications for success/error, and proper loading state management.",
+  "frontend/src/utils/withTimeout.ts": "Utility function that wraps promises with a timeout, rejecting with a clear error message if the operation doesn't complete within the specified time."
 }

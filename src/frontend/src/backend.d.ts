@@ -47,6 +47,7 @@ export interface backendInterface {
     addComment(postId: bigint, content: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createPost(content: string, image: ExternalBlob | null): Promise<void>;
+    deleteComment(postId: bigint, commentId: bigint): Promise<void>;
     deletePost(postId: bigint): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;

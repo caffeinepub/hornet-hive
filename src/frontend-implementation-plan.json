@@ -1,47 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "In-app sharing for Hornet Hive (Web Share + Copy Link fallback)",
+  "title": "Eliminate remaining startup deadlocks and replace endless loading with terminal error states",
   "requirements": [
     {
-      "id": "REQ-17",
-      "summary": "Add a signed-in \"Share Hornet Hive\" action in the Profile page that uses the Web Share API when available.",
+      "id": "REQ-32",
+      "summary": "Ensure useGetCallerUserProfile reaches a terminal error state even if actor initialization remains indefinitely fetching, and make retry re-bootstrap without refresh.",
       "acceptanceCriteria": [
-        "A clearly labeled share action (e.g., a button) is available in the signed-in app UI (recommended placement: Profile page).",
-        "On supported platforms, tapping the share action opens the native/system share sheet via the Web Share API.",
-        "The shared payload includes at minimum: title \"Hornet Hive\", a short text invite message in English, and a URL pointing to the current app origin (e.g., window.location.origin)."
+        "With an authenticated identity, if the actor never becomes available and `useActor()` remains in a fetching state, the app stops showing the spinner and transitions to the existing error UI (`BootstrapErrorScreen`) within the timeout window (<= 10 seconds total for the actor timeout + query execution).",
+        "The resulting error shown by `BootstrapErrorScreen` uses English user-facing text (no raw stack traces in the main message) and still allows viewing technical details in the collapsible section.",
+        "Clicking \"Try Again\" triggers a new attempt to initialize the actor and refetch the profile without requiring a page refresh."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/shareHornetHive.ts",
-          "operation": "create",
-          "description": "Create a small share utility (no backend required) that builds the share payload (title: \"Hornet Hive\", English invite text, url: window.location.origin) and triggers the Web Share API when supported. Handle errors by returning a success/failure result to the caller."
-        },
-        {
-          "path": "frontend/src/pages/ProfilePage.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a clearly labeled \"Share Hornet Hive\" Button to the signed-in Profile page UI that calls the new share utility. Use the existing shadcn-ui Button component for consistent styling. Verify the component's usage instructions before implementing."
+          "description": "Update `useGetCallerUserProfile` bootstrap behavior so the actor-init timeout countdown starts whenever `actor` is null (regardless of `actorFetching`), and after timeout the profile query is allowed to execute and fail into a user-visible error state (instead of perpetual loading). Refactor timeout state so it can be fully reset on retry (e.g., clear any in-flight timer state and restart countdown), while keeping all user-facing error messages in English."
         }
       ]
     },
     {
-      "id": "REQ-18",
-      "summary": "Add a graceful non-Web-Share fallback (Copy link) with sonner toast feedback when Web Share is unavailable or fails.",
+      "id": "REQ-33",
+      "summary": "Add an App-level bootstrap watchdog so authenticated users never see an endless spinner; after a fixed duration show BootstrapErrorScreen with working retry/logout actions.",
       "acceptanceCriteria": [
-        "If navigator.share is unavailable or fails, the UI offers a \"Copy link\" fallback that copies the app URL to the clipboard (navigator.clipboard when available).",
-        "User receives clear success/error feedback using the existing toast system (sonner) with English messages (e.g., \"Link copied\" / \"Could not copy link\").",
-        "The share flow never crashes the app; failures are handled gracefully and keep the user on the same screen."
+        "For authenticated users, the loading spinner cannot remain on screen indefinitely; after the watchdog duration elapses, the app shows `BootstrapErrorScreen`.",
+        "The watchdog error screen’s primary text is in English and does not blame the user; it indicates the app could not finish starting up and suggests trying again.",
+        "The watchdog \"Try Again\" action resets any timeout/watchdog state and attempts to re-bootstrap (invalidate actor query + refetch profile); \"Log Out\" clears identity and returns to the login screen."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/shareHornetHive.ts",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Extend the share utility to implement a Copy link fallback: attempt navigator.clipboard.writeText(window.location.origin) when available, and provide a safe legacy fallback (e.g., temporary textarea + document.execCommand) if needed. Ensure functions never throw uncaught errors and instead return a structured failure result."
+          "description": "Add a defensive bootstrap watchdog timer for authenticated users: if `profileLoading || !isFetched` persists beyond a fixed duration, render `BootstrapErrorScreen` instead of the loading spinner. Wire `Try Again` to reset watchdog state, call the existing retry behavior (invalidate the actor query + refetch the profile + reset the hook timeout), and wire `Log Out` to the existing logout behavior (clear identity + clear React Query cache) so the app returns to `LoginScreen` without refresh."
         },
         {
-          "path": "frontend/src/pages/ProfilePage.tsx",
+          "path": "frontend/src/components/auth/BootstrapErrorScreen.tsx",
           "operation": "modify",
-          "description": "Wire fallback UX on the Profile page: if Web Share is unsupported, show a \"Copy link\" action; if Web Share fails, keep the user on the same page and offer Copy link (either as an always-visible secondary action or revealed after failure). Use sonner toasts for success/error feedback with English messages (e.g., \"Link copied\" / \"Could not copy link\")."
+          "description": "Extend the user-friendly English message mapping to include the new watchdog startup-timeout case (e.g., when the provided error message indicates startup is taking too long), while keeping technical details available only in the collapsible section and avoiding raw stack traces in the primary message."
         }
       ]
     }

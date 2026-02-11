@@ -1,56 +1,66 @@
 {
   "kind": "build_request",
-  "title": "Add in-app share function to share Hornet Hive with friends",
-  "priority": "normal",
+  "title": "Eliminate remaining app-side startup deadlock and replace endless loading with a terminal error state",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-17",
-      "text": "Add an in-app \"Share Hornet Hive\" action that lets a signed-in student share the app using the device/browser system share sheet when available (Web Share API).",
+      "id": "REQ-32",
+      "text": "Update `frontend/src/hooks/useQueries.ts` so the `useGetCallerUserProfile` bootstrap path reaches a terminal state even when the backend actor initialization stays `isFetching` indefinitely (e.g., actor creation hangs while calling `_initializeAccessControlWithSecret`). Specifically: start the existing actor-initialization timeout countdown when `actor` is null regardless of whether `actorFetching` is true or false, and after the timeout ensure the profile query runs and fails with a user-visible error instead of leaving the UI in a perpetual loading state.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-6"
+          "msg-4"
         ],
         "quotes": [
-          "Add a share app function so students can share the app with friends"
+          "keep digging on the app side; it’s still stuck"
         ]
       },
       "acceptanceCriteria": [
-        "A clearly labeled share action (e.g., a button) is available in the signed-in app UI (recommended placement: Profile page).",
-        "On supported platforms, tapping the share action opens the native/system share sheet via the Web Share API.",
-        "The shared payload includes at minimum: title \"Hornet Hive\", a short text invite message in English, and a URL pointing to the current app origin (e.g., window.location.origin)."
+        "With an authenticated identity, if the actor never becomes available and `useActor()` remains in a fetching state, the app stops showing the spinner and transitions to the existing error UI (`BootstrapErrorScreen`) within the timeout window (<= 10 seconds total for the actor timeout + query execution).",
+        "The resulting error shown by `BootstrapErrorScreen` uses English user-facing text (no raw stack traces in the main message) and still allows viewing technical details in the collapsible section.",
+        "Clicking \"Try Again\" triggers a new attempt to initialize the actor and refetch the profile without requiring a page refresh."
       ]
     },
     {
-      "id": "REQ-18",
-      "text": "Provide a non-Web-Share fallback so sharing still works on browsers/devices that do not support the Web Share API.",
+      "id": "REQ-33",
+      "text": "Add a defensive bootstrap watchdog in `frontend/src/App.tsx` to prevent any remaining edge case from displaying an endless \"Loading...\" spinner for authenticated users. If the authenticated bootstrap state (`profileLoading || !isFetched`) persists beyond a fixed duration, render `BootstrapErrorScreen` with English messaging that indicates startup is taking too long, and provide working \"Try Again\" and \"Log Out\" actions using the same retry/logout behavior already used for the normal error state.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-6"
+          "msg-4"
         ],
         "quotes": [
-          "Add a share app function so students can share the app with friends"
+          "keep digging on the app side; it’s still stuck"
         ]
       },
       "acceptanceCriteria": [
-        "If navigator.share is unavailable or fails, the UI offers a \"Copy link\" fallback that copies the app URL to the clipboard (navigator.clipboard when available).",
-        "User receives clear success/error feedback using the existing toast system (sonner) with English messages (e.g., \"Link copied\" / \"Could not copy link\").",
-        "The share flow never crashes the app; failures are handled gracefully and keep the user on the same screen."
+        "For authenticated users, the loading spinner cannot remain on screen indefinitely; after the watchdog duration elapses, the app shows `BootstrapErrorScreen`.",
+        "The watchdog error screen’s primary text is in English and does not blame the user; it indicates the app could not finish starting up and suggests trying again.",
+        "The watchdog \"Try Again\" action resets any timeout/watchdog state and attempts to re-bootstrap (invalidate actor query + refetch profile); \"Log Out\" clears identity and returns to the login screen."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Backend must remain single-actor; no new backend services."
+    "Do not modify immutable frontend files: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
+    "Keep all user-facing text in English."
   ],
   "nonGoals": [
-    "Do not add sharing of individual posts/comments (this request is for sharing the app itself).",
-    "Do not integrate third-party social APIs or SDKs.",
-    "Do not require Internet Identity or backend changes to complete the share action."
+    "Backend changes to Motoko access control or `_initializeAccessControlWithSecret` behavior.",
+    "Changing the Internet Identity login flow UX beyond what is necessary to avoid an endless spinner.",
+    "Adding new features unrelated to startup/bootstrapping."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

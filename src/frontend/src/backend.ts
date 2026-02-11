@@ -140,6 +140,7 @@ export interface backendInterface {
     addComment(postId: bigint, content: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createPost(content: string, image: ExternalBlob | null): Promise<void>;
+    deleteComment(postId: bigint, commentId: bigint): Promise<void>;
     deletePost(postId: bigint): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -293,6 +294,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.createPost(arg0, await to_candid_opt_n10(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async deleteComment(arg0: bigint, arg1: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteComment(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteComment(arg0, arg1);
             return result;
         }
     }

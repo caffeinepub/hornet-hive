@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-in-app-share-hornet-hive-action-that-lets-a-signed-in-student-share-the-app-using-the-device-browser-system-share-sheet-when-available-web-share-api",
-      "featureTitle": "Add an in-app \"Share Hornet Hive\" action that lets a signed-in student share the app using the device/browser system share sheet when available (Web Share API).",
+      "featureId": "feature-update-frontend-src-hooks-usequeries-ts-so-the-usegetcalleruserprofile-bootstrap-path-reaches-a-terminal-state-even-when-the-backend-actor-initialization-stays-isfetching-indefinitely-e-g-actor-creation-hangs-while-calling-initializeaccesscontrolwithsecret-specifically-start-the-existing-actor-initialization-timeout-countdown-when-actor-is-null-regardless-of-whether-actorfetching-is-true-or-false-and-after-the-timeout-ensure-the-profile-query-runs-and-fails-with-a-user-visible-error-instead-of-leaving-the-ui-in-a-perpetual-loading-state",
+      "featureTitle": "Update `frontend/src/hooks/useQueries.ts` so the `useGetCallerUserProfile` bootstrap path reaches a terminal state even when the backend actor initialization stays `isFetching` indefinitely (e.g., actor creation hangs while calling `_initializeAccessControlWithSecret`). Specifically: start the existing actor-initialization timeout countdown when `actor` is null regardless of whether `actorFetching` is true or false, and after the timeout ensure the profile query runs and fails with a user-visible error instead of leaving the UI in a perpetual loading state.",
       "files": [
-        "frontend/src/pages/ProfilePage.tsx",
-        "frontend/src/utils/shareHornetHive.ts"
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,16 +17,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-17"
+        "REQ-32"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-provide-a-non-web-share-fallback-so-sharing-still-works-on-browsers-devices-that-do-not-support-the-web-share-api",
-      "featureTitle": "Provide a non-Web-Share fallback so sharing still works on browsers/devices that do not support the Web Share API.",
+      "featureId": "feature-add-a-defensive-bootstrap-watchdog-in-frontend-src-app-tsx-to-prevent-any-remaining-edge-case-from-displaying-an-endless-loading-spinner-for-authenticated-users-if-the-authenticated-bootstrap-state-profileloading-isfetched-persists-beyond-a-fixed-duration-render-bootstraperrorscreen-with-english-messaging-that-indicates-startup-is-taking-too-long-and-provide-working-try-again-and-log-out-actions-using-the-same-retry-logout-behavior-already-used-for-the-normal-error-state",
+      "featureTitle": "Add a defensive bootstrap watchdog in `frontend/src/App.tsx` to prevent any remaining edge case from displaying an endless \"Loading...\" spinner for authenticated users. If the authenticated bootstrap state (`profileLoading || !isFetched`) persists beyond a fixed duration, render `BootstrapErrorScreen` with English messaging that indicates startup is taking too long, and provide working \"Try Again\" and \"Log Out\" actions using the same retry/logout behavior already used for the normal error state.",
       "files": [
-        "frontend/src/pages/ProfilePage.tsx",
-        "frontend/src/utils/shareHornetHive.ts"
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/BootstrapErrorScreen.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -39,7 +38,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-18"
+        "REQ-33"
       ],
       "confidence": "high"
     }

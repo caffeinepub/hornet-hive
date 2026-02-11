@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Let signed-in students share the Hornet Hive app with friends via the device/browser share sheet, with a reliable fallback when sharing isn’t supported.
+**Goal:** Ensure authenticated app startup always reaches a terminal state by eliminating remaining bootstrap deadlocks and replacing endless loading with a clear, recoverable error screen.
 
 **Planned changes:**
-- Add a clearly labeled “Share Hornet Hive” action in the signed-in UI (recommended on the Profile page).
-- Implement sharing via the Web Share API (navigator.share) when available, sharing: title “Hornet Hive”, a short English invite text, and the current app origin URL.
-- Add a graceful fallback flow when Web Share is unavailable/fails: offer “Copy link” to copy the app URL using the clipboard API when available.
-- Show success/error feedback for copy/share outcomes using the existing toast system (sonner) and ensure failures never crash or navigate away.
+- Update `frontend/src/hooks/useQueries.ts` so the actor-initialization timeout starts whenever `actor` is null (even if `useActor()` stays `isFetching`), and after the timeout the profile query proceeds and fails into the existing `BootstrapErrorScreen` instead of leaving the UI stuck loading.
+- Add a defensive bootstrap watchdog in `frontend/src/App.tsx` that, for authenticated users, replaces a too-long startup spinner (`profileLoading || !isFetched` beyond a fixed duration) with `BootstrapErrorScreen` using English messaging and working "Try Again" / "Log Out" actions that reuse existing retry/logout behavior.
 
-**User-visible outcome:** Signed-in students can tap “Share Hornet Hive” to open the system share sheet (when supported) or copy an invite link with clear toast feedback if sharing isn’t available.
+**User-visible outcome:** Authenticated users will no longer see an endless loading spinner during startup; if initialization takes too long, they’ll see an English error screen with "Try Again" to re-attempt bootstrapping (without refreshing) or "Log Out" to return to the login screen.

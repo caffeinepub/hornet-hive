@@ -3,13 +3,15 @@ import type { Post } from '../../backend';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Heart, Send } from 'lucide-react';
+import { Heart, Send, Trash2 } from 'lucide-react';
 import { formatTimestamp } from '../../utils/timeFormat';
 import { useAddComment, useLikeComment } from '../../hooks/useQueries';
 import { useSuspensionStatus } from '../../hooks/useSuspensionStatus';
 import { validateTextContent } from '../../moderation/validateTextContent';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatSuspensionEnd } from '../../utils/timeFormat';
+import { useInternetIdentity } from '../../hooks/useInternetIdentity';
+import DeleteCommentDialog from './DeleteCommentDialog';
 
 interface CommentsThreadProps {
   post: Post;
@@ -18,9 +20,13 @@ interface CommentsThreadProps {
 export default function CommentsThread({ post }: CommentsThreadProps) {
   const [commentText, setCommentText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCommentId, setSelectedCommentId] = useState<bigint | null>(null);
+  
   const addCommentMutation = useAddComment();
   const likeCommentMutation = useLikeComment();
   const { isSuspended, suspensionEnd } = useSuspensionStatus();
+  const { identity } = useInternetIdentity();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +55,16 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
     likeCommentMutation.mutate({ postId: post.id, commentId });
   };
 
+  const handleDeleteClick = (commentId: bigint) => {
+    setSelectedCommentId(commentId);
+    setDeleteDialogOpen(true);
+  };
+
+  const isCommentAuthor = (commentAuthorId: string): boolean => {
+    if (!identity) return false;
+    return commentAuthorId === identity.getPrincipal().toString();
+  };
+
   return (
     <div className="space-y-4 pt-4">
       <Separator />
@@ -66,16 +82,28 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
               </div>
               <p className="text-sm text-foreground">{comment.content}</p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 h-8"
-              onClick={() => handleLikeComment(comment.id)}
-              disabled={likeCommentMutation.isPending}
-            >
-              <Heart className="h-3 w-3" />
-              <span className="text-xs">{Number(comment.likes)}</span>
-            </Button>
+            <div className="flex items-start gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1 h-8"
+                onClick={() => handleLikeComment(comment.id)}
+                disabled={likeCommentMutation.isPending}
+              >
+                <Heart className="h-3 w-3" />
+                <span className="text-xs">{Number(comment.likes)}</span>
+              </Button>
+              {isCommentAuthor(comment.authorId.toString()) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => handleDeleteClick(comment.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -102,6 +130,16 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+      )}
+
+      {/* Delete Comment Dialog */}
+      {selectedCommentId !== null && (
+        <DeleteCommentDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          postId={post.id}
+          commentId={selectedCommentId}
+        />
       )}
     </div>
   );

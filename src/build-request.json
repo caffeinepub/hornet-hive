@@ -1,0 +1,275 @@
+{
+  "kind": "build_request",
+  "title": "Hornet Hive: student-safe social feed with moderation, reporting, likes, and weekly polls",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a mobile-first, responsive web app named \"Hornet Hive\" with a consistent Kelly-green, white, and black design system (buttons, typography, navigation, cards, states) applied across all screens.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "The name of this app will be the Hornet Hive. The main color scheme of the app will be Kelly-green, white, and black."
+        ]
+      },
+      "acceptanceCriteria": [
+        "App title/branding shows \"Hornet Hive\" in the UI",
+        "Primary/secondary colors across the app follow Kelly-green/white/black (no default template colors leaking through)",
+        "Core flows are usable on small mobile screens without horizontal scrolling"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement authentication using Internet Identity and require each authenticated user to set a unique username before accessing posting features.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "This app will require students to enter their username into the app so that all students can see who has posted a message."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Unauthenticated users are prompted to sign in with Internet Identity",
+        "On first sign-in, user must create a username before they can post/comment/like/report",
+        "Usernames are shown alongside posts and comments everywhere they appear"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add username safety validation that blocks usernames containing profanity or other disallowed terms, and prevent saving invalid usernames on both frontend and backend.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "The app will not let anyone have an inappropriate username, making sure to fully check the username of a student for curse words or any inappropriateness of any kind."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Attempting to set a disallowed username fails with a clear English error message",
+        "Backend rejects invalid usernames even if frontend validation is bypassed",
+        "Username validation is deterministic and consistent across sessions"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement a group-chat-style global feed where students can create posts containing text and optionally an image; each post must record author username, author principal, and created date/time.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Think of it as a giant group chat of anyone who has the app",
+          "The date and time of each post will be recorded by the app."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Users can create a text-only post",
+        "Users can create a post with an attached image (subject to moderation constraints in other requirements)",
+        "Feed shows posts ordered newest-first and displays author username and timestamp"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement comments on posts, with each comment recording author username, author principal, and created date/time; allow likes on both posts and comments (no dislike feature).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Students will also have an option to like other students’ comments and/or images, but they will not have an option to dislike"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Users can add a comment to a post and see it appear in a thread",
+        "Users can like/unlike posts and comments; like counts update accordingly",
+        "There is no UI or API for any form of \"dislike\""
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add text safety moderation for posts and comments: block content that contains profanity or disallowed terms before it is published, enforcing the rule in the backend (with matching frontend pre-check).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "will not tolerate any messages that are inappropriate in any way, whether it be curse words of any kind, or inappropriate conversations and/or topics"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Publishing a post/comment with a banned word is rejected with an English error message",
+        "Backend prevents storing/serving disallowed content even if a malicious client attempts it",
+        "Allowed content publishes normally"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Implement image posting with strict safety gating: (1) enforce file type and size limits, and (2) implement a moderation pipeline that can block posting of images flagged as not school-appropriate. If automated image analysis cannot be performed within platform constraints, the pipeline must default to \"requires review\" behavior and keep images hidden until resolved via reporting/moderation actions defined in this build.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "This safety feature will also analyze any images that students post, and will make sure that nothing inappropriate is shown in the image."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frontend restricts uploads to a defined set of image formats and a defined max size; backend enforces the same limits",
+        "There is a stored moderation state for image posts (e.g., allowed/hidden/review) that determines whether the image is visible in the feed",
+        "If an image is not in an allowed/visible state, other users cannot view it in the feed"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Add post reporting for both text and image posts: any student can report a post; once reported, the content is removed from public view as soon as possible, and the author receives an anonymous notification that their post was reported (reporter identity is never revealed).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Students will also have the option to report any message and/or image",
+          "Once a message has been reported, that message will be taken down",
+          "the student who posted the reported message will be notified that their message has been reported anonymously"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each post has a \"Report\" action with a confirmation step",
+        "After a report is submitted, the post no longer appears in the public feed for other users",
+        "The post author can see a notification that the post was reported, and no reporter-identifying information is exposed in UI or API"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Add account reporting: users can report another user's account; count only distinct reporters per reported account. When an account reaches 5 distinct reports, notify the reported student anonymously and apply a 7-day suspension that prevents posting and commenting until the suspension expires automatically.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "A student’s account must be reported by a total of 5 different students",
+          "you will receive a 7-day suspension from posting on the app",
+          "not be allowed to post for the following 7 days. After the 7 days have passed, they will be allowed to post again."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Users can report an account from the UI (e.g., from a profile view or post author menu)",
+        "The backend counts unique reporters and ignores duplicate reports from the same reporter",
+        "At exactly 5 distinct reports, the reported user receives a notification stating 5 anonymous students reported them and that they are suspended for 7 days",
+        "Suspended users are blocked from creating posts and comments until the suspension end time; after expiry they can post again without manual intervention"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Implement an in-app notifications center to display moderation/reporting-related notices (e.g., post reported, account suspended, poll available), with notifications stored per user and shown in reverse chronological order.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "the student who posted the reported message will be notified",
+          "you will receive a notification that 5 anonymous students have reported your account",
+          "each student will be notified of the poll"
+        ]
+      },
+      "acceptanceCriteria": [
+        "There is a notifications view accessible from the main navigation",
+        "Post-report and account-suspension events create notification entries for the affected user",
+        "Notifications do not leak reporter identities"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Implement weekly polls: each Friday, generate a poll containing the top ten most talked-about topics from that week’s posts/comments; notify students that voting is open; allow voting only on Friday; show results starting Saturday morning; disable voting on Saturday and later; delete the previous poll each Monday.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Each Friday at the end of the week, the app will generate a poll of the top ten most talked about topics during that week",
+          "Students will be able to see the results of the poll the next day (Saturday morning).",
+          "Students will no longer be able to vote on Saturday",
+          "Each Monday, the old poll from last week will be deleted."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A poll is generated for the current week with exactly 10 options derived from weekly discussion content (document the deterministic extraction approach used)",
+        "Voting is accepted only during the Friday voting window; attempts outside the window fail with an English message",
+        "Before Saturday morning, users cannot see vote counts/results; starting Saturday morning, results are visible and voting is disabled",
+        "On Monday, the previous week’s poll is no longer accessible via UI or API"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Provide core app navigation and screens: Feed, Create Post, Notifications, Polls (view/vote/results), and Profile (view/set username, view suspension status).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Think of it as a giant group chat",
+          "will be notified",
+          "generate a poll",
+          "require students to enter their username"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All listed screens are reachable via a mobile-friendly navigation pattern",
+        "Profile screen shows current username and whether the user is suspended (and until when, if suspended)",
+        "Polls screen shows current state (not available / voting open / results) in clear English"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Generate and include static branding assets for Hornet Hive (logo and app icon) and render them in the UI (header/login/loading/manifest areas as appropriate) from frontend/public/assets/generated.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "The name of this app will be the Hornet Hive."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Generated images exist under frontend/public/assets/generated and are referenced directly by the frontend",
+        "App shows a Hornet Hive logo/icon in at least the main header and authentication/onboarding area",
+        "Assets follow the Kelly-green/white/black palette"
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor (no additional backend services).",
+    "Do not modify any files under frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "No third-party authentication providers; only Internet Identity.",
+    "Do not rely on external AI/LLM services for text or image analysis; any moderation logic must be implemented within the app/canister constraints."
+  ],
+  "nonGoals": [
+    "Publishing to Google Play / App Store submission and packaging (APK/AAB) is out of scope for this build.",
+    "Perfect semantic detection of \"inappropriate conversations/topics\" beyond deterministic rules is out of scope; implement rule-based moderation aligned with the provided requirements.",
+    "Real-time chat via WebSockets is out of scope; use a refresh/polling-based feed experience."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Hornet Hive primary logo: stylized hornet + honeycomb/hive mark, flat vector look, Kelly-green/white/black (hornet-hive-logo.dim_1024x1024.png)",
+      "Hornet Hive app icon: simplified hornet/hive symbol, high contrast, Kelly-green/white/black (hornet-hive-app-icon.dim_512x512.png)",
+      "Small honeycomb divider pattern tile, minimal, Kelly-green on white (honeycomb-pattern-tile.dim_256x256.png)"
+    ],
+    "edits": []
+  }
+}

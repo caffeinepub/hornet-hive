@@ -1,0 +1,417 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Hornet Hive (frontend): mobile-first moderated social feed with reporting, likes, notifications, and weekly polls",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Apply a consistent Kelly-green/white/black mobile-first design system across the app.",
+      "acceptanceCriteria": [
+        "App title/branding shows \"Hornet Hive\" in the UI",
+        "Primary/secondary colors across the app follow Kelly-green/white/black (no default template colors leaking through)",
+        "Core flows are usable on small mobile screens without horizontal scrolling"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Define global CSS variables/tailwind tokens for Kelly-green/white/black, set base typography, card/button/input states, and ensure mobile-first responsive layout defaults (no horizontal overflow)."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Tune theme extensions to map design tokens to primary/secondary/foreground/background and ensure consistent component color usage across screens."
+        },
+        {
+          "path": "frontend/src/components/layout/AppShell.tsx",
+          "operation": "create",
+          "description": "Create a reusable app shell (header + content + bottom navigation container) that enforces consistent spacing, typography, and color usage across all screens. Use shadcn-ui primitives where appropriate; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Require Internet Identity sign-in and force unique username setup before enabling posting interactions; show usernames everywhere.",
+      "acceptanceCriteria": [
+        "Unauthenticated users are prompted to sign in with Internet Identity",
+        "On first sign-in, user must create a username before they can post/comment/like/report",
+        "Usernames are shown alongside posts and comments everywhere they appear"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add an authentication gate using the existing Internet Identity hook and require login before showing any application data. After login, load the caller profile and enforce username setup before enabling posting/commenting/liking/reporting. Use the authorization component's frontend flow guidance for profile setup (getCallerUserProfile/saveCallerUserProfile); verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginScreen.tsx",
+          "operation": "create",
+          "description": "Create a login/onboarding screen that prompts sign-in with Internet Identity, shows Hornet Hive branding, and handles logout by clearing cached data (e.g., react-query cache). Use the authorization component guidance for login/logout UX; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/profile/UsernameSetupModal.tsx",
+          "operation": "create",
+          "description": "Create a modal that appears only after authentication when the user has no username/profile; lets them set a unique username by calling backend methods and blocks access to posting features until successful. Use shadcn-ui Dialog/Form controls; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/feed/PostCard.tsx",
+          "operation": "create",
+          "description": "Render post header fields including author username and timestamp consistently in the feed, and prepare space for author actions (report account/report post). Use shadcn-ui Card/DropdownMenu where appropriate; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add deterministic username safety validation in the UI with clear errors and block invalid submissions.",
+      "acceptanceCriteria": [
+        "Attempting to set a disallowed username fails with a clear English error message",
+        "Backend rejects invalid usernames even if frontend validation is bypassed",
+        "Username validation is deterministic and consistent across sessions"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/moderation/disallowedTerms.ts",
+          "operation": "create",
+          "description": "Add a deterministic, versioned list of disallowed terms/patterns for usernames and text moderation, plus normalization rules (case folding, trimming, leetspeak-lite mapping if implemented) to keep decisions consistent across sessions."
+        },
+        {
+          "path": "frontend/src/moderation/validateUsername.ts",
+          "operation": "create",
+          "description": "Implement username validation (length/charset + disallowed-term checks) returning a clear English message on failure; used by username setup UI before calling backend."
+        },
+        {
+          "path": "frontend/src/components/profile/UsernameSetupModal.tsx",
+          "operation": "modify",
+          "description": "Integrate validateUsername() to block submission client-side and display clear English error messaging when a username is disallowed or malformed. Use shadcn-ui form feedback styling; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Build a global feed UI with create-post flow supporting optional images; show author + timestamp; newest-first display.",
+      "acceptanceCriteria": [
+        "Users can create a text-only post",
+        "Users can create a post with an attached image (subject to moderation constraints in other requirements)",
+        "Feed shows posts ordered newest-first and displays author username and timestamp"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/FeedPage.tsx",
+          "operation": "create",
+          "description": "Create the main feed screen that fetches posts, displays newest-first, supports pull-to-refresh style reload, and renders each post via PostCard (including authorName and timestamp). Use react-query for caching and periodic refresh to match a polling-based feed experience."
+        },
+        {
+          "path": "frontend/src/pages/CreatePostPage.tsx",
+          "operation": "create",
+          "description": "Create a create-post screen with text input and optional image picker, and submit via backend createPost. Use the blob-storage ExternalBlob to wrap selected images for upload; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/feed/PostCard.tsx",
+          "operation": "modify",
+          "description": "Render post content, optional image preview (when allowed/visible), and timestamp formatting. When an image is not available/visible due to moderation state, show a clear placeholder message instead of the image."
+        },
+        {
+          "path": "frontend/src/utils/timeFormat.ts",
+          "operation": "create",
+          "description": "Add a small utility to format backend Time (bigint) into user-friendly local date/time strings for posts/comments."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add comments UI per post and like/unlike on posts and comments with live count updates; no dislikes anywhere.",
+      "acceptanceCriteria": [
+        "Users can add a comment to a post and see it appear in a thread",
+        "Users can like/unlike posts and comments; like counts update accordingly",
+        "There is no UI or API for any form of \"dislike\""
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/feed/CommentsThread.tsx",
+          "operation": "create",
+          "description": "Implement a comments thread UI under each post: list comments (authorName + timestamp), add-comment input, and like buttons for each comment. Use shadcn-ui Button/Input/Separator; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/feed/PostActions.tsx",
+          "operation": "create",
+          "description": "Add post-level actions: like/unlike and open/close comments. Ensure no dislike controls exist. Use shadcn-ui Button; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/FeedPage.tsx",
+          "operation": "modify",
+          "description": "Wire PostActions and CommentsThread into each rendered post and connect them to backend likePost/likeComment/addComment calls; invalidate/refetch posts to update like counts and new comments."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Add deterministic text safety moderation pre-checks for posts and comments with clear rejection messages.",
+      "acceptanceCriteria": [
+        "Publishing a post/comment with a banned word is rejected with an English error message",
+        "Backend prevents storing/serving disallowed content even if a malicious client attempts it",
+        "Allowed content publishes normally"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/moderation/validateTextContent.ts",
+          "operation": "create",
+          "description": "Implement deterministic text moderation for posts/comments (normalization + disallowed terms) returning clear English error messages on failure."
+        },
+        {
+          "path": "frontend/src/pages/CreatePostPage.tsx",
+          "operation": "modify",
+          "description": "Run validateTextContent() before submitting a post; block submission and show a clear English error when disallowed content is detected."
+        },
+        {
+          "path": "frontend/src/components/feed/CommentsThread.tsx",
+          "operation": "modify",
+          "description": "Run validateTextContent() before submitting a comment; block submission and show a clear English error when disallowed content is detected."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Restrict image uploads by type/size and reflect moderation visibility in the UI; default to hidden/review behavior when not visible.",
+      "acceptanceCriteria": [
+        "Frontend restricts uploads to a defined set of image formats and a defined max size; backend enforces the same limits",
+        "There is a stored moderation state for image posts (e.g., allowed/hidden/review) that determines whether the image is visible in the feed",
+        "If an image is not in an allowed/visible state, other users cannot view it in the feed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/constants/uploads.ts",
+          "operation": "create",
+          "description": "Define allowed image MIME types/extensions and a max file size constant used by the image picker UI (e.g., JPEG/PNG/WebP + size cap)."
+        },
+        {
+          "path": "frontend/src/utils/imageFileValidation.ts",
+          "operation": "create",
+          "description": "Implement a validator that checks selected file type and size and returns a clear English error string for rejected uploads."
+        },
+        {
+          "path": "frontend/src/pages/CreatePostPage.tsx",
+          "operation": "modify",
+          "description": "Apply imageFileValidation before creating an ExternalBlob for upload. Use the blob-storage ExternalBlob to prepare uploads and optionally show progress; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/feed/PostCard.tsx",
+          "operation": "modify",
+          "description": "Treat missing/withheld images as not visible and render a safe placeholder message (e.g., 'Image hidden pending review' or 'Image unavailable') instead of attempting to display bytes/URL."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Add post reporting UI with confirmation and update feed visibility; show the author an anonymous reported notification in-app (no reporter identity leaks).",
+      "acceptanceCriteria": [
+        "Each post has a \"Report\" action with a confirmation step",
+        "After a report is submitted, the post no longer appears in the public feed for other users",
+        "The post author can see a notification that the post was reported, and no reporter-identifying information is exposed in UI or API"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/reporting/ReportPostDialog.tsx",
+          "operation": "create",
+          "description": "Create a confirmation dialog for reporting a post and call backend reportPost on confirm. Use shadcn-ui Dialog/Button; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/feed/PostCard.tsx",
+          "operation": "modify",
+          "description": "Add a 'Report' action that opens ReportPostDialog. After success, refetch posts so the reported post is removed/hidden according to backend behavior."
+        },
+        {
+          "path": "frontend/src/notifications/localNotificationsStore.ts",
+          "operation": "create",
+          "description": "Implement a per-user local notifications store (keyed by current principal string) used to surface moderation/reporting notices in the UI without exposing reporter identities."
+        },
+        {
+          "path": "frontend/src/components/reporting/ReportPostDialog.tsx",
+          "operation": "modify",
+          "description": "After a successful report action, write a local notification for the reporter ('Report submitted') and ensure the UI never captures or displays any reporter-identifying information."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Add account reporting from the UI and reflect suspension status by disabling posting/commenting actions when suspended.",
+      "acceptanceCriteria": [
+        "Users can report an account from the UI (e.g., from a profile view or post author menu)",
+        "The backend counts unique reporters and ignores duplicate reports from the same reporter",
+        "At exactly 5 distinct reports, the reported user receives a notification stating 5 anonymous students reported them and that they are suspended for 7 days",
+        "Suspended users are blocked from creating posts and comments until the suspension end time; after expiry they can post again without manual intervention"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/reporting/ReportAccountDialog.tsx",
+          "operation": "create",
+          "description": "Create a confirmation dialog for reporting a user's account (from a post author action menu) that calls backend reportUser. Use shadcn-ui Dialog/Button; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/feed/PostCard.tsx",
+          "operation": "modify",
+          "description": "Add an author menu/action that lets a user report the post author's account (without revealing any reporter identity). Wire to ReportAccountDialog."
+        },
+        {
+          "path": "frontend/src/hooks/useSuspensionStatus.ts",
+          "operation": "create",
+          "description": "Create a hook that derives whether the current user is suspended (and until when) from the loaded caller profile and current time; used to disable post/comment creation in the UI."
+        },
+        {
+          "path": "frontend/src/pages/CreatePostPage.tsx",
+          "operation": "modify",
+          "description": "Disable post submission UI and show a clear English suspension message when useSuspensionStatus indicates the user is suspended."
+        },
+        {
+          "path": "frontend/src/components/feed/CommentsThread.tsx",
+          "operation": "modify",
+          "description": "Disable comment submission UI and show a clear English suspension message when useSuspensionStatus indicates the user is suspended."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Implement an in-app notifications center UI showing moderation/reporting and poll notices in reverse chronological order without leaking reporter identity.",
+      "acceptanceCriteria": [
+        "There is a notifications view accessible from the main navigation",
+        "Post-report and account-suspension events create notification entries for the affected user",
+        "Notifications do not leak reporter identities"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/NotificationsPage.tsx",
+          "operation": "create",
+          "description": "Create a notifications center screen accessible from the main navigation, rendering notifications in reverse chronological order and using clear English labels (e.g., 'Your post was reported', 'Your account is suspended'). Use shadcn-ui Card/List patterns; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/notifications/notificationTypes.ts",
+          "operation": "create",
+          "description": "Define notification types/payloads for moderation/reporting-related notices (post reported, account suspended, poll available) ensuring no reporter-identifying fields exist."
+        },
+        {
+          "path": "frontend/src/notifications/localNotificationsStore.ts",
+          "operation": "modify",
+          "description": "Add sorting (reverse chronological), persistence (localStorage), and helper methods to append and read notifications per user."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire NotificationsPage into the app navigation and include a navigation entry/badge indicator driven by unread counts from the notifications store."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Implement a weekly polls UI with Friday-only voting, Saturday results visibility, and Monday cleanup, using a deterministic topic extraction approach on the client from fetched posts/comments.",
+      "acceptanceCriteria": [
+        "A poll is generated for the current week with exactly 10 options derived from weekly discussion content (document the deterministic extraction approach used)",
+        "Voting is accepted only during the Friday voting window; attempts outside the window fail with an English message",
+        "Before Saturday morning, users cannot see vote counts/results; starting Saturday morning, results are visible and voting is disabled",
+        "On Monday, the previous week’s poll is no longer accessible via UI or API"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PollsPage.tsx",
+          "operation": "create",
+          "description": "Create a polls screen that displays the current poll state (not available / voting open / results) in clear English, enforces Friday-only voting UI, and shows results starting Saturday morning."
+        },
+        {
+          "path": "frontend/src/polls/pollTimeWindow.ts",
+          "operation": "create",
+          "description": "Implement deterministic time-window helpers (Friday voting window, Saturday results start, Monday cleanup) based on local time with clearly documented rules used by the Polls UI."
+        },
+        {
+          "path": "frontend/src/polls/extractWeeklyTopics.ts",
+          "operation": "create",
+          "description": "Implement deterministic extraction of exactly 10 poll options from the week's fetched posts/comments (e.g., normalize text, remove stop-words, count token frequency, stable tie-breaking) and document the approach in code comments."
+        },
+        {
+          "path": "frontend/src/polls/localPollStore.ts",
+          "operation": "create",
+          "description": "Persist the generated weekly poll, per-user vote, and aggregate counts in localStorage (keyed by week id and current principal). Enforce Friday-only voting with clear English errors, hide results until Saturday, and delete/ignore previous poll data on Monday per rules."
+        },
+        {
+          "path": "frontend/src/pages/PollsPage.tsx",
+          "operation": "modify",
+          "description": "Wire in extractWeeklyTopics() using fetched feed content, store the weekly poll in localPollStore, push a 'Poll available' notification into the notifications store when voting opens."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Provide mobile-friendly navigation and implement Feed, Create Post, Notifications, Polls, and Profile screens including suspension status.",
+      "acceptanceCriteria": [
+        "All listed screens are reachable via a mobile-friendly navigation pattern",
+        "Profile screen shows current username and whether the user is suspended (and until when, if suspended)",
+        "Polls screen shows current state (not available / voting open / results) in clear English"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/nav/BottomNav.tsx",
+          "operation": "create",
+          "description": "Create a mobile-first bottom navigation with tabs for Feed, Create Post, Notifications, Polls, and Profile. Use shadcn-ui Button and icons if available; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/ProfilePage.tsx",
+          "operation": "create",
+          "description": "Create a profile screen that shows current username, allows setting/updating username (when permitted), and displays suspension status including suspension end time when present."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Implement page switching/routing (e.g., tab-based navigation) to ensure all required screens are reachable and embedded within AppShell and BottomNav (no orphan pages)."
+        },
+        {
+          "path": "frontend/src/components/layout/AppShell.tsx",
+          "operation": "modify",
+          "description": "Add header area that includes app branding (logo + name) and a link/button to notifications; ensure layout remains mobile-first and responsive."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Add generated Hornet Hive branding assets (logo, app icon, pattern tile) and wire them into header/onboarding/manifest UI.",
+      "acceptanceCriteria": [
+        "Generated images exist under frontend/public/assets/generated and are referenced directly by the frontend",
+        "App shows a Hornet Hive logo/icon in at least the main header and authentication/onboarding area",
+        "Assets follow the Kelly-green/white/black palette"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/hornet-hive-logo.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated Hornet Hive primary logo asset to the project as a static file at the exact path specified."
+        },
+        {
+          "path": "frontend/public/assets/generated/hornet-hive-app-icon.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the generated Hornet Hive app icon asset to the project as a static file at the exact path specified."
+        },
+        {
+          "path": "frontend/public/assets/generated/honeycomb-pattern-tile.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated honeycomb divider pattern tile asset to the project as a static file at the exact path specified."
+        },
+        {
+          "path": "frontend/src/components/layout/AppShell.tsx",
+          "operation": "modify",
+          "description": "Render the logo in the app header and apply the honeycomb pattern tile as a subtle divider/background accent in a way that remains accessible and mobile-friendly."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginScreen.tsx",
+          "operation": "modify",
+          "description": "Render the Hornet Hive logo/icon in the authentication/onboarding area using the static assets at frontend/public/assets/generated/hornet-hive-logo.dim_1024x1024.png and frontend/public/assets/generated/hornet-hive-app-icon.dim_512x512.png."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Reference the generated app icon for browser tab/metadata where appropriate and ensure the document title remains 'Hornet Hive'."
+        },
+        {
+          "path": "frontend/public/manifest.webmanifest",
+          "operation": "create",
+          "description": "Create a basic web manifest referencing frontend/public/assets/generated/hornet-hive-app-icon.dim_512x512.png and setting name/short_name to 'Hornet Hive' to support installable/PWA-like behavior."
+        }
+      ]
+    }
+  ]
+}

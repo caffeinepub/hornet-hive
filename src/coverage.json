@@ -1,0 +1,370 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-11T01:44:17.839Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 13,
+    "implemented": 13,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Create a mobile-first, responsive web app named \"Hornet Hive\" with a consistent Kelly-green, white, and black design system (buttons, typography, navigation, cards, states) applied across all screens.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/layout/AppShell.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/layout/AppShell.tsx"
+        ]
+      },
+      {
+        "id": "REQ-10",
+        "summary": "Implement an in-app notifications center to display moderation/reporting-related notices (e.g., post reported, account suspended, poll available), with notifications stored per user and shown in reverse chronological order.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/NotificationsPage.tsx",
+          "frontend/src/notifications/notificationTypes.ts",
+          "frontend/src/notifications/localNotificationsStore.ts",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/NotificationsPage.tsx",
+          "frontend/src/notifications/notificationTypes.ts",
+          "frontend/src/notifications/localNotificationsStore.ts",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Implement weekly polls: each Friday, generate a poll containing the top ten most talked-about topics from that week’s posts/comments; notify students that voting is open; allow voting only on Friday; show results starting Saturday morning; disable voting on Saturday and later; delete the previous poll each Monday.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/PollsPage.tsx",
+          "frontend/src/polls/pollTimeWindow.ts",
+          "frontend/src/polls/extractWeeklyTopics.ts",
+          "frontend/src/polls/localPollStore.ts",
+          "frontend/src/pages/PollsPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/PollsPage.tsx",
+          "frontend/src/polls/pollTimeWindow.ts",
+          "frontend/src/polls/extractWeeklyTopics.ts",
+          "frontend/src/polls/localPollStore.ts",
+          "frontend/src/pages/PollsPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-12",
+        "summary": "Provide core app navigation and screens: Feed, Create Post, Notifications, Polls (view/vote/results), and Profile (view/set username, view suspension status).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/nav/BottomNav.tsx",
+          "frontend/src/pages/ProfilePage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppShell.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/nav/BottomNav.tsx",
+          "frontend/src/pages/ProfilePage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppShell.tsx"
+        ]
+      },
+      {
+        "id": "REQ-13",
+        "summary": "Generate and include static branding assets for Hornet Hive (logo and app icon) and render them in the UI (header/login/loading/manifest areas as appropriate) from frontend/public/assets/generated.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/assets/generated/hornet-hive-logo.dim_1024x1024.png",
+          "frontend/public/assets/generated/hornet-hive-app-icon.dim_512x512.png",
+          "frontend/public/assets/generated/honeycomb-pattern-tile.dim_256x256.png",
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/src/components/auth/LoginScreen.tsx",
+          "frontend/index.html",
+          "frontend/public/manifest.webmanifest"
+        ],
+        "matchedFiles": [
+          "frontend/public/assets/generated/hornet-hive-logo.dim_1024x1024.png",
+          "frontend/public/assets/generated/hornet-hive-app-icon.dim_512x512.png",
+          "frontend/public/assets/generated/honeycomb-pattern-tile.dim_256x256.png",
+          "frontend/src/components/layout/AppShell.tsx",
+          "frontend/src/components/auth/LoginScreen.tsx",
+          "frontend/index.html",
+          "frontend/public/manifest.webmanifest"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Implement authentication using Internet Identity and require each authenticated user to set a unique username before accessing posting features.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/components/auth/LoginScreen.tsx",
+          "frontend/src/components/profile/UsernameSetupModal.tsx",
+          "frontend/src/components/feed/PostCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/components/auth/LoginScreen.tsx",
+          "frontend/src/components/profile/UsernameSetupModal.tsx",
+          "frontend/src/components/feed/PostCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Add username safety validation that blocks usernames containing profanity or other disallowed terms, and prevent saving invalid usernames on both frontend and backend.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/moderation/disallowedTerms.ts",
+          "frontend/src/moderation/validateUsername.ts",
+          "frontend/src/components/profile/UsernameSetupModal.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/moderation/disallowedTerms.ts",
+          "frontend/src/moderation/validateUsername.ts",
+          "frontend/src/components/profile/UsernameSetupModal.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Implement a group-chat-style global feed where students can create posts containing text and optionally an image; each post must record author username, author principal, and created date/time.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/FeedPage.tsx",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/PostCard.tsx",
+          "frontend/src/utils/timeFormat.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/FeedPage.tsx",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/PostCard.tsx",
+          "frontend/src/utils/timeFormat.ts"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Implement comments on posts, with each comment recording author username, author principal, and created date/time; allow likes on both posts and comments (no dislike feature).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/feed/CommentsThread.tsx",
+          "frontend/src/components/feed/PostActions.tsx",
+          "frontend/src/pages/FeedPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/feed/CommentsThread.tsx",
+          "frontend/src/pages/FeedPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Add text safety moderation for posts and comments: block content that contains profanity or disallowed terms before it is published, enforcing the rule in the backend (with matching frontend pre-check).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/moderation/validateTextContent.ts",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/CommentsThread.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/moderation/validateTextContent.ts",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/CommentsThread.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Implement image posting with strict safety gating: (1) enforce file type and size limits, and (2) implement a moderation pipeline that can block posting of images flagged as not school-appropriate. If automated image analysis cannot be performed within platform constraints, the pipeline must default to \"requires review\" behavior and keep images hidden until resolved via reporting/moderation actions defined in this build.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/constants/uploads.ts",
+          "frontend/src/utils/imageFileValidation.ts",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/PostCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/constants/uploads.ts",
+          "frontend/src/utils/imageFileValidation.ts",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/PostCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Add post reporting for both text and image posts: any student can report a post; once reported, the content is removed from public view as soon as possible, and the author receives an anonymous notification that their post was reported (reporter identity is never revealed).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/reporting/ReportPostDialog.tsx",
+          "frontend/src/components/feed/PostCard.tsx",
+          "frontend/src/notifications/localNotificationsStore.ts",
+          "frontend/src/components/reporting/ReportPostDialog.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/reporting/ReportPostDialog.tsx",
+          "frontend/src/components/feed/PostCard.tsx",
+          "frontend/src/notifications/localNotificationsStore.ts",
+          "frontend/src/components/reporting/ReportPostDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Add account reporting: users can report another user's account; count only distinct reporters per reported account. When an account reaches 5 distinct reports, notify the reported student anonymously and apply a 7-day suspension that prevents posting and commenting until the suspension expires automatically.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/reporting/ReportAccountDialog.tsx",
+          "frontend/src/components/feed/PostCard.tsx",
+          "frontend/src/hooks/useSuspensionStatus.ts",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/CommentsThread.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/reporting/ReportAccountDialog.tsx",
+          "frontend/src/components/feed/PostCard.tsx",
+          "frontend/src/hooks/useSuspensionStatus.ts",
+          "frontend/src/pages/CreatePostPage.tsx",
+          "frontend/src/components/feed/CommentsThread.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/authorization/MixinAuthorization.mo",
+    "backend/authorization/access-control.mo",
+    "backend/blob-storage/Mixin.mo",
+    "backend/blob-storage/Storage.mo",
+    "backend/main.mo",
+    "build-request.json",
+    "build-template/Dockerfile",
+    "build-template/LICENSE",
+    "build-template/README.md",
+    "build-template/deploy.sh",
+    "build-template/icp.yaml",
+    "build-template/package.json",
+    "build-template/pnpm-lock.yaml",
+    "build-template/pnpm-workspace.yaml",
+    "build-template/scripts/prune-unused-images.js",
+    "build-template/scripts/resize-images.js",
+    "build-template/src/backend/canister.yaml",
+    "build-template/src/backend/system-idl/aaaaa-aa.did",
+    "build-template/src/frontend/canister.yaml",
+    "build-template/src/frontend/components.json",
+    "build-template/src/frontend/env.json",
+    "build-template/src/frontend/eslint-rules/no-bigint-in-query-keys.js",
+    "build-template/src/frontend/eslint-rules/require-internet-identity-provider.js",
+    "build-template/src/frontend/eslint.config.js",
+    "build-template/src/frontend/package.json",
+    "build-template/src/frontend/postcss.config.js",
+    "build-template/src/frontend/src/components/ui/accordion.tsx",
+    "build-template/src/frontend/src/components/ui/alert-dialog.tsx",
+    "build-template/src/frontend/src/components/ui/alert.tsx",
+    "build-template/src/frontend/src/components/ui/aspect-ratio.tsx",
+    "build-template/src/frontend/src/components/ui/avatar.tsx",
+    "build-template/src/frontend/src/components/ui/badge.tsx",
+    "build-template/src/frontend/src/components/ui/breadcrumb.tsx",
+    "build-template/src/frontend/src/components/ui/button.tsx",
+    "build-template/src/frontend/src/components/ui/calendar.tsx",
+    "build-template/src/frontend/src/components/ui/card.tsx",
+    "build-template/src/frontend/src/components/ui/carousel.tsx",
+    "build-template/src/frontend/src/components/ui/chart.tsx",
+    "build-template/src/frontend/src/components/ui/checkbox.tsx",
+    "build-template/src/frontend/src/components/ui/collapsible.tsx",
+    "build-template/src/frontend/src/components/ui/command.tsx",
+    "build-template/src/frontend/src/components/ui/context-menu.tsx",
+    "build-template/src/frontend/src/components/ui/dialog.tsx",
+    "build-template/src/frontend/src/components/ui/drawer.tsx",
+    "build-template/src/frontend/src/components/ui/dropdown-menu.tsx",
+    "build-template/src/frontend/src/components/ui/form.tsx",
+    "build-template/src/frontend/src/components/ui/hover-card.tsx",
+    "build-template/src/frontend/src/components/ui/input-otp.tsx",
+    "build-template/src/frontend/src/components/ui/input.tsx",
+    "build-template/src/frontend/src/components/ui/label.tsx",
+    "build-template/src/frontend/src/components/ui/menubar.tsx",
+    "build-template/src/frontend/src/components/ui/navigation-menu.tsx",
+    "build-template/src/frontend/src/components/ui/pagination.tsx",
+    "build-template/src/frontend/src/components/ui/popover.tsx",
+    "build-template/src/frontend/src/components/ui/progress.tsx",
+    "build-template/src/frontend/src/components/ui/radio-group.tsx",
+    "build-template/src/frontend/src/components/ui/resizable.tsx",
+    "build-template/src/frontend/src/components/ui/scroll-area.tsx",
+    "build-template/src/frontend/src/components/ui/select.tsx",
+    "build-template/src/frontend/src/components/ui/separator.tsx",
+    "build-template/src/frontend/src/components/ui/sheet.tsx",
+    "build-template/src/frontend/src/components/ui/sidebar.tsx",
+    "build-template/src/frontend/src/components/ui/skeleton.tsx",
+    "build-template/src/frontend/src/components/ui/slider.tsx",
+    "build-template/src/frontend/src/components/ui/sonner.tsx",
+    "build-template/src/frontend/src/components/ui/switch.tsx",
+    "build-template/src/frontend/src/components/ui/table.tsx",
+    "build-template/src/frontend/src/components/ui/tabs.tsx",
+    "build-template/src/frontend/src/components/ui/textarea.tsx",
+    "build-template/src/frontend/src/components/ui/toggle-group.tsx",
+    "build-template/src/frontend/src/components/ui/toggle.tsx",
+    "build-template/src/frontend/src/components/ui/tooltip.tsx",
+    "build-template/src/frontend/src/hooks/use-mobile.tsx",
+    "build-template/src/frontend/src/lib/utils.ts",
+    "build-template/src/frontend/tsconfig.json",
+    "build-template/src/frontend/vite.config.js",
+    "build-template/tsconfig.json",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/public/assets/generated/honeycomb-pattern-tile.dim_256x256.png",
+    "frontend/public/assets/generated/hornet-hive-app-icon.dim_512x512.png",
+    "frontend/public/assets/generated/hornet-hive-logo.dim_1024x1024.png",
+    "frontend/public/manifest.webmanifest",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/auth/LoginScreen.tsx",
+    "frontend/src/components/feed/CommentsThread.tsx",
+    "frontend/src/components/feed/PostCard.tsx",
+    "frontend/src/components/layout/AppShell.tsx",
+    "frontend/src/components/nav/BottomNav.tsx",
+    "frontend/src/components/profile/UsernameSetupModal.tsx",
+    "frontend/src/components/reporting/ReportAccountDialog.tsx",
+    "frontend/src/components/reporting/ReportPostDialog.tsx",
+    "frontend/src/config.ts",
+    "frontend/src/constants/uploads.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useSuspensionStatus.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/moderation/disallowedTerms.ts",
+    "frontend/src/moderation/validateTextContent.ts",
+    "frontend/src/moderation/validateUsername.ts",
+    "frontend/src/notifications/localNotificationsStore.ts",
+    "frontend/src/notifications/notificationTypes.ts",
+    "frontend/src/pages/CreatePostPage.tsx",
+    "frontend/src/pages/FeedPage.tsx",
+    "frontend/src/pages/NotificationsPage.tsx",
+    "frontend/src/pages/PollsPage.tsx",
+    "frontend/src/pages/ProfilePage.tsx",
+    "frontend/src/polls/extractWeeklyTopics.ts",
+    "frontend/src/polls/localPollStore.ts",
+    "frontend/src/polls/pollTimeWindow.ts",
+    "frontend/src/ui-summary.json",
+    "frontend/src/utils/StorageClient.ts",
+    "frontend/src/utils/imageFileValidation.ts",
+    "frontend/src/utils/timeFormat.ts",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

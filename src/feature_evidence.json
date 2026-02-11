@@ -1,0 +1,299 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-a-mobile-first-responsive-web-app-named-hornet-hive-with-a-consistent-kelly-green-white-and-black-design-system-buttons-typography-navigation-cards-states-applied-across-all-screens",
+      "featureTitle": "Create a mobile-first, responsive web app named \"Hornet Hive\" with a consistent Kelly-green, white, and black design system (buttons, typography, navigation, cards, states) applied across all screens.",
+      "files": [
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-authentication-using-internet-identity-and-require-each-authenticated-user-to-set-a-unique-username-before-accessing-posting-features",
+      "featureTitle": "Implement authentication using Internet Identity and require each authenticated user to set a unique username before accessing posting features.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/LoginScreen.tsx",
+        "frontend/src/components/feed/PostCard.tsx",
+        "frontend/src/components/profile/UsernameSetupModal.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-username-safety-validation-that-blocks-usernames-containing-profanity-or-other-disallowed-terms-and-prevent-saving-invalid-usernames-on-both-frontend-and-backend",
+      "featureTitle": "Add username safety validation that blocks usernames containing profanity or other disallowed terms, and prevent saving invalid usernames on both frontend and backend.",
+      "files": [
+        "frontend/src/components/profile/UsernameSetupModal.tsx",
+        "frontend/src/moderation/disallowedTerms.ts",
+        "frontend/src/moderation/validateUsername.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-group-chat-style-global-feed-where-students-can-create-posts-containing-text-and-optionally-an-image-each-post-must-record-author-username-author-principal-and-created-date-time",
+      "featureTitle": "Implement a group-chat-style global feed where students can create posts containing text and optionally an image; each post must record author username, author principal, and created date/time.",
+      "files": [
+        "frontend/src/components/feed/PostCard.tsx",
+        "frontend/src/pages/CreatePostPage.tsx",
+        "frontend/src/pages/FeedPage.tsx",
+        "frontend/src/utils/timeFormat.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-comments-on-posts-with-each-comment-recording-author-username-author-principal-and-created-date-time-allow-likes-on-both-posts-and-comments-no-dislike-feature",
+      "featureTitle": "Implement comments on posts, with each comment recording author username, author principal, and created date/time; allow likes on both posts and comments (no dislike feature).",
+      "files": [
+        "frontend/src/components/feed/CommentsThread.tsx",
+        "frontend/src/pages/FeedPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-text-safety-moderation-for-posts-and-comments-block-content-that-contains-profanity-or-disallowed-terms-before-it-is-published-enforcing-the-rule-in-the-backend-with-matching-frontend-pre-check",
+      "featureTitle": "Add text safety moderation for posts and comments: block content that contains profanity or disallowed terms before it is published, enforcing the rule in the backend (with matching frontend pre-check).",
+      "files": [
+        "frontend/src/components/feed/CommentsThread.tsx",
+        "frontend/src/moderation/validateTextContent.ts",
+        "frontend/src/pages/CreatePostPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-image-posting-with-strict-safety-gating-1-enforce-file-type-and-size-limits-and-2-implement-a-moderation-pipeline-that-can-block-posting-of-images-flagged-as-not-school-appropriate-if-automated-image-analysis-cannot-be-performed-within-platform-constraints-the-pipeline-must-default-to-requires-review-behavior-and-keep-images-hidden-until-resolved-via-reporting-moderation-actions-defined-in-this-build",
+      "featureTitle": "Implement image posting with strict safety gating: (1) enforce file type and size limits, and (2) implement a moderation pipeline that can block posting of images flagged as not school-appropriate. If automated image analysis cannot be performed within platform constraints, the pipeline must default to \"requires review\" behavior and keep images hidden until resolved via reporting/moderation actions defined in this build.",
+      "files": [
+        "frontend/src/components/feed/PostCard.tsx",
+        "frontend/src/constants/uploads.ts",
+        "frontend/src/pages/CreatePostPage.tsx",
+        "frontend/src/utils/imageFileValidation.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-post-reporting-for-both-text-and-image-posts-any-student-can-report-a-post-once-reported-the-content-is-removed-from-public-view-as-soon-as-possible-and-the-author-receives-an-anonymous-notification-that-their-post-was-reported-reporter-identity-is-never-revealed",
+      "featureTitle": "Add post reporting for both text and image posts: any student can report a post; once reported, the content is removed from public view as soon as possible, and the author receives an anonymous notification that their post was reported (reporter identity is never revealed).",
+      "files": [
+        "frontend/src/components/feed/PostCard.tsx",
+        "frontend/src/components/reporting/ReportPostDialog.tsx",
+        "frontend/src/notifications/localNotificationsStore.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-account-reporting-users-can-report-another-user-s-account-count-only-distinct-reporters-per-reported-account-when-an-account-reaches-5-distinct-reports-notify-the-reported-student-anonymously-and-apply-a-7-day-suspension-that-prevents-posting-and-commenting-until-the-suspension-expires-automatically",
+      "featureTitle": "Add account reporting: users can report another user's account; count only distinct reporters per reported account. When an account reaches 5 distinct reports, notify the reported student anonymously and apply a 7-day suspension that prevents posting and commenting until the suspension expires automatically.",
+      "files": [
+        "frontend/src/components/feed/CommentsThread.tsx",
+        "frontend/src/components/feed/PostCard.tsx",
+        "frontend/src/components/reporting/ReportAccountDialog.tsx",
+        "frontend/src/hooks/useSuspensionStatus.ts",
+        "frontend/src/pages/CreatePostPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-an-in-app-notifications-center-to-display-moderation-reporting-related-notices-e-g-post-reported-account-suspended-poll-available-with-notifications-stored-per-user-and-shown-in-reverse-chronological-order",
+      "featureTitle": "Implement an in-app notifications center to display moderation/reporting-related notices (e.g., post reported, account suspended, poll available), with notifications stored per user and shown in reverse chronological order.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/notifications/localNotificationsStore.ts",
+        "frontend/src/notifications/notificationTypes.ts",
+        "frontend/src/pages/NotificationsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-weekly-polls-each-friday-generate-a-poll-containing-the-top-ten-most-talked-about-topics-from-that-week-s-posts-comments-notify-students-that-voting-is-open-allow-voting-only-on-friday-show-results-starting-saturday-morning-disable-voting-on-saturday-and-later-delete-the-previous-poll-each-monday",
+      "featureTitle": "Implement weekly polls: each Friday, generate a poll containing the top ten most talked-about topics from that week’s posts/comments; notify students that voting is open; allow voting only on Friday; show results starting Saturday morning; disable voting on Saturday and later; delete the previous poll each Monday.",
+      "files": [
+        "frontend/src/pages/PollsPage.tsx",
+        "frontend/src/polls/extractWeeklyTopics.ts",
+        "frontend/src/polls/localPollStore.ts",
+        "frontend/src/polls/pollTimeWindow.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-core-app-navigation-and-screens-feed-create-post-notifications-polls-view-vote-results-and-profile-view-set-username-view-suspension-status",
+      "featureTitle": "Provide core app navigation and screens: Feed, Create Post, Notifications, Polls (view/vote/results), and Profile (view/set username, view suspension status).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/components/nav/BottomNav.tsx",
+        "frontend/src/pages/ProfilePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-and-include-static-branding-assets-for-hornet-hive-logo-and-app-icon-and-render-them-in-the-ui-header-login-loading-manifest-areas-as-appropriate-from-frontend-public-assets-generated",
+      "featureTitle": "Generate and include static branding assets for Hornet Hive (logo and app icon) and render them in the UI (header/login/loading/manifest areas as appropriate) from frontend/public/assets/generated.",
+      "files": [
+        "frontend/index.html",
+        "frontend/public/manifest.webmanifest",
+        "frontend/src/components/auth/LoginScreen.tsx",
+        "frontend/src/components/layout/AppShell.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-13"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

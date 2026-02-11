@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build a mobile social app named \"Hornet Hive\" for students in Eureka, Illinois: a safe, moderated group-chat-style feed with strict text/image appropriateness enforcement, reporting workflows, likes (no dislikes), and weekly topic polls.",
+  "architectural_notes": [
+    "Target platform: mobile app distribution via Google Play (free).",
+    "Moderation pipeline required for both text (profanity/topic filtering) and images (nudity/skin/revealing attire detection) before allowing posts to publish.",
+    "Reporting system must support anonymous reporters, rapid takedown, and tracking unique reporters per account for 5-report threshold enforcement.",
+    "Suspension system: enforce time-based posting lockout (7 days) with automatic restoration."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Hornet Hive primary logo: stylized hornet + honeycomb/hive mark, flat vector look, Kelly-green/white/black (hornet-hive-logo.dim_1024x1024.png)\n- Hornet Hive app icon: simplified hornet/hive symbol, high contrast, Kelly-green/white/black (hornet-hive-app-icon.dim_512x512.png)\n- Small honeycomb divider pattern tile, minimal, Kelly-green on white (honeycomb-pattern-tile.dim_256x256.png)",
+  "existing_features": [
+    {
+      "id": "feature-create-a-mobile-first-responsive-web-app-named-hornet-hive-with-a-consistent-kelly-green-white-and-black-design-system-buttons-typography-navigation-cards-states-applied-across-all-screens",
+      "title": "Create a mobile-first, responsive web app named \"Hornet Hive\" with a consistent Kelly-green, white, and black design system (buttons, typography, navigation, cards, states) applied across all screens.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-authentication-using-internet-identity-and-require-each-authenticated-user-to-set-a-unique-username-before-accessing-posting-features",
+      "title": "Implement authentication using Internet Identity and require each authenticated user to set a unique username before accessing posting features.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-username-safety-validation-that-blocks-usernames-containing-profanity-or-other-disallowed-terms-and-prevent-saving-invalid-usernames-on-both-frontend-and-backend",
+      "title": "Add username safety validation that blocks usernames containing profanity or other disallowed terms, and prevent saving invalid usernames on both frontend and backend.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-group-chat-style-global-feed-where-students-can-create-posts-containing-text-and-optionally-an-image-each-post-must-record-author-username-author-principal-and-created-date-time",
+      "title": "Implement a group-chat-style global feed where students can create posts containing text and optionally an image; each post must record author username, author principal, and created date/time.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-comments-on-posts-with-each-comment-recording-author-username-author-principal-and-created-date-time-allow-likes-on-both-posts-and-comments-no-dislike-feature",
+      "title": "Implement comments on posts, with each comment recording author username, author principal, and created date/time; allow likes on both posts and comments (no dislike feature).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-text-safety-moderation-for-posts-and-comments-block-content-that-contains-profanity-or-disallowed-terms-before-it-is-published-enforcing-the-rule-in-the-backend-with-matching-frontend-pre-check",
+      "title": "Add text safety moderation for posts and comments: block content that contains profanity or disallowed terms before it is published, enforcing the rule in the backend (with matching frontend pre-check).",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-image-posting-with-strict-safety-gating-1-enforce-file-type-and-size-limits-and-2-implement-a-moderation-pipeline-that-can-block-posting-of-images-flagged-as-not-school-appropriate-if-automated-image-analysis-cannot-be-performed-within-platform-constraints-the-pipeline-must-default-to-requires-review-behavior-and-keep-images-hidden-until-resolved-via-reporting-moderation-actions-defined-in-this-build",
+      "title": "Implement image posting with strict safety gating: (1) enforce file type and size limits, and (2) implement a moderation pipeline that can block posting of images flagged as not school-appropriate. If automated image analysis cannot be performed within platform constraints, the pipeline must default to \"requires review\" behavior and keep images hidden until resolved via reporting/moderation actions defined in this build.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-post-reporting-for-both-text-and-image-posts-any-student-can-report-a-post-once-reported-the-content-is-removed-from-public-view-as-soon-as-possible-and-the-author-receives-an-anonymous-notification-that-their-post-was-reported-reporter-identity-is-never-revealed",
+      "title": "Add post reporting for both text and image posts: any student can report a post; once reported, the content is removed from public view as soon as possible, and the author receives an anonymous notification that their post was reported (reporter identity is never revealed).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-account-reporting-users-can-report-another-user-s-account-count-only-distinct-reporters-per-reported-account-when-an-account-reaches-5-distinct-reports-notify-the-reported-student-anonymously-and-apply-a-7-day-suspension-that-prevents-posting-and-commenting-until-the-suspension-expires-automatically",
+      "title": "Add account reporting: users can report another user's account; count only distinct reporters per reported account. When an account reaches 5 distinct reports, notify the reported student anonymously and apply a 7-day suspension that prevents posting and commenting until the suspension expires automatically.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-in-app-notifications-center-to-display-moderation-reporting-related-notices-e-g-post-reported-account-suspended-poll-available-with-notifications-stored-per-user-and-shown-in-reverse-chronological-order",
+      "title": "Implement an in-app notifications center to display moderation/reporting-related notices (e.g., post reported, account suspended, poll available), with notifications stored per user and shown in reverse chronological order.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-weekly-polls-each-friday-generate-a-poll-containing-the-top-ten-most-talked-about-topics-from-that-week-s-posts-comments-notify-students-that-voting-is-open-allow-voting-only-on-friday-show-results-starting-saturday-morning-disable-voting-on-saturday-and-later-delete-the-previous-poll-each-monday",
+      "title": "Implement weekly polls: each Friday, generate a poll containing the top ten most talked-about topics from that week’s posts/comments; notify students that voting is open; allow voting only on Friday; show results starting Saturday morning; disable voting on Saturday and later; delete the previous poll each Monday.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-core-app-navigation-and-screens-feed-create-post-notifications-polls-view-vote-results-and-profile-view-set-username-view-suspension-status",
+      "title": "Provide core app navigation and screens: Feed, Create Post, Notifications, Polls (view/vote/results), and Profile (view/set username, view suspension status).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-include-static-branding-assets-for-hornet-hive-logo-and-app-icon-and-render-them-in-the-ui-header-login-loading-manifest-areas-as-appropriate-from-frontend-public-assets-generated",
+      "title": "Generate and include static branding assets for Hornet Hive (logo and app icon) and render them in the UI (header/login/loading/manifest areas as appropriate) from frontend/public/assets/generated.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Hornet Hive core social feed: students post text and images with username visible; record date/time for each post",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Safety moderation: block inappropriate text (profanity/inappropriate topics) and validate usernames for profanity/inappropriateness",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Image safety moderation: analyze uploaded images and block posts with too much exposed skin or otherwise not school-appropriate content",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Post reporting: allow students to report messages/images; reported content taken down ASAP; poster notified anonymously (reporter hidden)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Account reporting & enforcement: account flagged by 5 distinct student reports triggers anonymous notification and 7-day posting suspension, then auto-reenable posting",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Reactions: allow liking posts/comments; no dislike option",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Weekly poll feature: each Friday generate poll of top 10 most talked-about topics; notify students; voting open Fri only; results visible Saturday morning; poll deleted Monday",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Branding: app name Hornet Hive with Kelly-green/white/black color scheme; free release on Google Play (and other app stores as applicable)",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Hornet Hive",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

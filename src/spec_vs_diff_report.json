@@ -1,0 +1,144 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-11T01:44:17.835Z",
+  "summary": "The diff adds a new Motoko backend actor plus a mobile-first React frontend with Internet Identity login, username setup modal, feed UI with posts/comments/likes, reporting dialogs, and a Kelly-green theme. However, several key moderation, reporting/notification, image-safety, and weekly-polls requirements are not evidenced in the provided diff (or are contradicted by what’s shown).",
+  "missing_requirements": [
+    {
+      "id": "REQ-3",
+      "requirement": "Add username safety validation that blocks usernames containing profanity or other disallowed terms, and prevent saving invalid usernames on both frontend and backend.",
+      "reason": "Frontend includes username validation, but the backend `setUniqueUsername` shown only checks empty and uniqueness; no disallowed/profanity check is evidenced on the backend.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/moderation/validateUsername.ts",
+        "frontend/src/moderation/disallowedTerms.ts"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Add text safety moderation for posts and comments with backend enforcement (matching frontend pre-check).",
+      "reason": "Frontend pre-check exists for comments; backend enforcement for post/comment content moderation is not evidenced in the shown backend code (createPost/addComment implementations are truncated/absent).",
+      "evidence": [
+        "frontend/src/components/feed/CommentsThread.tsx",
+        "frontend/src/moderation/validateTextContent.ts",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Implement image posting with strict safety gating: enforce file type/size limits on frontend+backend and store an image moderation state (allowed/hidden/review) that controls visibility.",
+      "reason": "Frontend defines allowed MIME types and max file size constants, but no evidence is shown of Create Post enforcing them. Also, posts render `post.image.getDirectURL()` directly with no moderation state check, and the backend Post type shown has no image moderation state field.",
+      "evidence": [
+        "frontend/src/constants/uploads.ts",
+        "frontend/src/components/feed/PostCard.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "requirement": "Post reporting removes the post from public view and notifies the author anonymously (reporter identity never revealed).",
+      "reason": "UI for reporting exists, but the provided code shows a local notification being added for the reporter (not the author). Backend-side author notification and feed-removal behavior is not evidenced in the diff excerpt.",
+      "evidence": [
+        "frontend/src/components/reporting/ReportPostDialog.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Account reporting with distinct reporters; at 5 reports apply 7-day suspension and notify the reported user.",
+      "reason": "UI dialog exists and the backend profile includes `accountSuspendedUntil`, but distinct reporter counting, the 5-report threshold logic, suspension duration, and notification to the reported user are not evidenced in the shown backend code.",
+      "evidence": [
+        "frontend/src/components/reporting/ReportAccountDialog.tsx",
+        "frontend/src/hooks/useSuspensionStatus.ts",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "Implement an in-app notifications center stored per user (reverse chronological), including post-report and account-suspension notices without leaking reporter identities.",
+      "reason": "Notifications appear to be handled via a frontend-only local store (`localNotificationsStore`) and unread count derived locally; no backend per-user notification storage or reverse-chronological retrieval is evidenced.",
+      "evidence": [
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/components/reporting/ReportPostDialog.tsx"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "requirement": "Implement weekly polls with deterministic top-10 topic extraction, Friday-only voting, Saturday results visibility, and Monday deletion of previous poll; notify students when voting opens.",
+      "reason": "Polls navigation/page wiring exists, but no poll generation logic, time-window enforcement, results gating, deletion rules, deterministic topic extraction documentation/implementation, or notifications are evidenced in the diff summary.",
+      "evidence": [
+        "frontend/src/App.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "requirement": "Generate and include static branding assets (logo, app icon, honeycomb pattern tile) under frontend/public/assets/generated and reference them in the UI.",
+      "reason": "The UI references the logo and app icon paths, but the diff summary does not show the actual image files being added (and the honeycomb pattern tile is not evidenced as present or used).",
+      "evidence": [
+        "frontend/src/components/auth/LoginScreen.tsx",
+        "frontend/src/components/layout/AppShell.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Use of a secret admin token from URL params (`caffeineAdminToken`) to initialize access control on the actor.",
+      "reason": "BuildRequest does not mention any admin-token/secret URL parameter mechanism; adding hidden admin initialization is an unrequested capability.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "Local-only notification creation for the reporting user ('Your report has been submitted...') via a frontend local notifications store.",
+      "reason": "REQ-10 requires an in-app notifications center for moderation/reporting notices per user, but does not request client-only local notification storage; also REQ-8 specifically requires notifying the post author, not the reporter.",
+      "evidence": [
+        "frontend/src/components/reporting/ReportPostDialog.tsx",
+        "frontend/src/components/layout/AppShell.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.64,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/public/manifest.webmanifest",
+    "frontend/src/App.tsx",
+    "frontend/src/components/auth/LoginScreen.tsx",
+    "frontend/src/components/feed/CommentsThread.tsx",
+    "frontend/src/components/feed/PostCard.tsx",
+    "frontend/src/components/layout/AppShell.tsx",
+    "frontend/src/components/nav/BottomNav.tsx",
+    "frontend/src/components/profile/UsernameSetupModal.tsx",
+    "frontend/src/components/reporting/ReportAccountDialog.tsx",
+    "frontend/src/components/reporting/ReportPostDialog.tsx",
+    "frontend/src/constants/uploads.ts",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useSuspensionStatus.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/moderation/disallowedTerms.ts",
+    "frontend/src/moderation/validateTextContent.ts",
+    "frontend/src/moderation/validateUsername.ts",
+    "frontend/src/notifications/localNotificationsStore.ts",
+    "frontend/src/notifications/notificationTypes.ts",
+    "frontend/src/pages/CreatePostPage.tsx",
+    "frontend/src/pages/FeedPage.tsx",
+    "frontend/src/pages/NotificationsPage.tsx",
+    "frontend/src/pages/PollsPage.tsx",
+    "frontend/src/pages/ProfilePage.tsx",
+    "frontend/src/polls/extractWeeklyTopics.ts",
+    "frontend/src/polls/localPollStore.ts",
+    "frontend/src/polls/pollTimeWindow.ts",
+    "frontend/src/utils/imageFileValidation.ts",
+    "frontend/src/utils/timeFormat.ts",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

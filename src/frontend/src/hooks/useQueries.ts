@@ -1,47 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
+import { useActorStatus } from './useActorStatus';
 import type { PostView, UserProfile } from '../backend';
 import { ExternalBlob } from '../backend';
 import { Principal } from '@dfinity/principal';
-import { useEffect, useState, useRef } from 'react';
 import { withTimeout } from '../utils/withTimeout';
 
 export function useGetCallerUserProfile() {
-  const { actor, isFetching: actorFetching } = useActor();
-  const [actorTimeout, setActorTimeout] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Set a timeout for actor initialization - starts whenever actor is null
-  useEffect(() => {
-    // Clear any existing timer
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-
-    if (!actor) {
-      // Start countdown whenever actor is not available
-      timerRef.current = setTimeout(() => {
-        setActorTimeout(true);
-      }, 8000); // 8 second timeout
-    } else {
-      // Actor is available, clear timeout state
-      setActorTimeout(false);
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [actor]);
+  const { actor, isLoading: actorLoading, isError: actorError, error: actorErrorDetails } = useActorStatus();
 
   const query = useQuery<UserProfile | null>({
     queryKey: ['currentUserProfile'],
     queryFn: async () => {
       if (!actor) {
-        throw new Error('Unable to connect to the service. Please check your connection and try again.');
+        throw new Error('Actor not available');
       }
       // Wrap the actor call with a timeout
       return withTimeout(
@@ -50,13 +21,11 @@ export function useGetCallerUserProfile() {
         'Profile fetch timed out. Please try again.'
       );
     },
-    // Enable the query if:
-    // 1. Actor is available and not fetching, OR
-    // 2. Actor timed out (so we can throw an error)
-    enabled: (!!actor && !actorFetching) || actorTimeout,
+    // Only enable when actor is available and not in error state
+    enabled: !!actor && !actorLoading && !actorError,
     retry: (failureCount, error) => {
-      // Don't retry timeout or connection errors
-      if (error.message.includes('timed out') || error.message.includes('connect')) {
+      // Don't retry timeout errors
+      if (error.message.includes('timed out')) {
         return false;
       }
       return failureCount < 2;
@@ -64,25 +33,27 @@ export function useGetCallerUserProfile() {
     staleTime: 0,
   });
 
-  // Reset timeout state when needed for retry
-  const resetTimeout = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    setActorTimeout(false);
-  };
+  // If actor initialization failed, surface that error instead of profile fetch error
+  const effectiveError = actorError && actorErrorDetails 
+    ? new Error(actorErrorDetails.message)
+    : query.error;
+
+  const effectiveIsError = actorError || query.isError;
 
   return {
     ...query,
-    isLoading: (actorFetching || query.isLoading) && !actorTimeout,
-    isFetched: query.isFetched || (actorTimeout && query.isError),
-    resetTimeout,
+    // Loading if actor is loading OR profile query is loading (but not if actor errored)
+    isLoading: actorLoading || (query.isLoading && !actorError),
+    // Error if actor errored OR profile query errored
+    isError: effectiveIsError,
+    error: effectiveError,
+    // Fetched if actor errored (so we can show error screen) OR profile query fetched
+    isFetched: actorError || query.isFetched,
   };
 }
 
 export function useGetUserProfile(userPrincipal: Principal | null) {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isLoading: actorLoading } = useActorStatus();
 
   return useQuery<UserProfile | null>({
     queryKey: ['userProfile', userPrincipal?.toString()],
@@ -90,12 +61,12 @@ export function useGetUserProfile(userPrincipal: Principal | null) {
       if (!actor || !userPrincipal) return null;
       return actor.getUserProfile(userPrincipal);
     },
-    enabled: !!actor && !actorFetching && !!userPrincipal,
+    enabled: !!actor && !actorLoading && !!userPrincipal,
   });
 }
 
 export function useSetUniqueUsername() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -110,7 +81,7 @@ export function useSetUniqueUsername() {
 }
 
 export function useGetPosts() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor, isLoading: actorLoading } = useActorStatus();
 
   return useQuery<PostView[]>({
     queryKey: ['posts'],
@@ -118,13 +89,13 @@ export function useGetPosts() {
       if (!actor) return [];
       return actor.getPosts();
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor && !actorLoading,
     refetchInterval: 10000, // Poll every 10 seconds for new posts
   });
 }
 
 export function useCreatePost() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -139,7 +110,7 @@ export function useCreatePost() {
 }
 
 export function useDeletePost() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -154,7 +125,7 @@ export function useDeletePost() {
 }
 
 export function useDeleteComment() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -169,7 +140,7 @@ export function useDeleteComment() {
 }
 
 export function useLikePost() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -188,7 +159,7 @@ export function useLikePost() {
 }
 
 export function useAddComment() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -203,7 +174,7 @@ export function useAddComment() {
 }
 
 export function useLikeComment() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -222,7 +193,7 @@ export function useLikeComment() {
 }
 
 export function useReportPost() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -237,7 +208,7 @@ export function useReportPost() {
 }
 
 export function useReportComment() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -252,7 +223,7 @@ export function useReportComment() {
 }
 
 export function useReportUser() {
-  const { actor } = useActor();
+  const { actor } = useActorStatus();
 
   return useMutation({
     mutationFn: async (reportedUser: Principal) => {

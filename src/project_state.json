@@ -4,44 +4,37 @@
   "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "Current like behavior may allow the same student to like the same post multiple times."
+    "App error: \"Unable to connect to the service. Please check your connection and try again.\" (connectivity/service connection failure)"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-frontend-post-like-ui-to-gracefully-handle-a-duplicate-like-attempt-by-showing-an-english-user-facing-message-instead-of-failing-silently",
-      "title": "Update the frontend post-like UI to gracefully handle a duplicate-like attempt by showing an English user-facing message instead of failing silently.",
+      "id": "feature-update-the-actor-initialization-hook-so-that-failures-to-create-the-backend-actor-are-surfaced-to-the-app-instead-of-leaving-the-actor-as-null-including-exposing-an-error-object-and-loading-error-flags-to-consumers",
+      "title": "Update the actor initialization hook so that failures to create the backend actor are surfaced to the app (instead of leaving the actor as null), including exposing an Error object and loading/error flags to consumers.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-app-bootstrap-profile-loading-flow-so-it-does-not-throw-the-generic-unable-to-connect-to-the-service-error-solely-because-the-actor-is-null-while-an-actor-initialization-error-already-exists-instead-show-the-real-initialization-error-or-timeout-in-the-existing-bootstraperrorscreen",
+      "title": "Fix the app bootstrap/profile-loading flow so it does not throw the generic \"Unable to connect to the service\" error solely because the actor is null while an actor initialization error already exists; instead, show the real initialization error (or timeout) in the existing BootstrapErrorScreen.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
-    }
-  ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Prevent a student from liking the same post multiple times (enforce one-like-per-student-per-post).",
-      "reqIds": [],
-      "status": "pending"
     },
     {
-      "id": "AR-2",
-      "summary": "Enforce a one-like-per-student-per-post rule in the backend so the same authenticated caller cannot successfully like the same post more than once.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "If existing persisted post data must be upgraded, add/extend conditional migration logic so existing posts initialize the new per-post liked-by tracking without breaking getPosts or likePost.",
+      "id": "feature-make-the-retry-action-on-the-bootstrap-error-screen-reliably-recover-from-transient-connection-agent-issues-by-forcing-a-fresh-actor-initialization-and-then-re-running-the-profile-fetch-without-requiring-a-full-page-reload",
+      "title": "Make the Retry action on the bootstrap error screen reliably recover from transient connection/agent issues by forcing a fresh actor initialization and then re-running the profile fetch without requiring a full page reload.",
       "reqIds": [
         "REQ-3"
       ],
-      "status": "pending"
+      "version": 1
     }
   ],
-  "projectName": "Prevent the same student from liking the same post multiple times",
+  "new_feature_requests": [],
+  "projectName": "Fix bootstrap connectivity error by surfacing actor initialization failures and improving retries",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

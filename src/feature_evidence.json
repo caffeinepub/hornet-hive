@@ -2,10 +2,33 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-post-like-ui-to-gracefully-handle-a-duplicate-like-attempt-by-showing-an-english-user-facing-message-instead-of-failing-silently",
-      "featureTitle": "Update the frontend post-like UI to gracefully handle a duplicate-like attempt by showing an English user-facing message instead of failing silently.",
+      "featureId": "feature-update-the-actor-initialization-hook-so-that-failures-to-create-the-backend-actor-are-surfaced-to-the-app-instead-of-leaving-the-actor-as-null-including-exposing-an-error-object-and-loading-error-flags-to-consumers",
+      "featureTitle": "Update the actor initialization hook so that failures to create the backend actor are surfaced to the app (instead of leaving the actor as null), including exposing an Error object and loading/error flags to consumers.",
       "files": [
-        "frontend/src/components/feed/PostCard.tsx"
+        "frontend/src/hooks/useActorStatus.ts",
+        "frontend/src/utils/actorInitError.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-the-app-bootstrap-profile-loading-flow-so-it-does-not-throw-the-generic-unable-to-connect-to-the-service-error-solely-because-the-actor-is-null-while-an-actor-initialization-error-already-exists-instead-show-the-real-initialization-error-or-timeout-in-the-existing-bootstraperrorscreen",
+      "featureTitle": "Fix the app bootstrap/profile-loading flow so it does not throw the generic \"Unable to connect to the service\" error solely because the actor is null while an actor initialization error already exists; instead, show the real initialization error (or timeout) in the existing BootstrapErrorScreen.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/BootstrapErrorScreen.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,6 +41,27 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-retry-action-on-the-bootstrap-error-screen-reliably-recover-from-transient-connection-agent-issues-by-forcing-a-fresh-actor-initialization-and-then-re-running-the-profile-fetch-without-requiring-a-full-page-reload",
+      "featureTitle": "Make the Retry action on the bootstrap error screen reliably recover from transient connection/agent issues by forcing a fresh actor initialization and then re-running the profile fetch without requiring a full page reload.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useActorStatus.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

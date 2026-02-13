@@ -1,5 +1,5 @@
 // Deterministic list of disallowed terms for username and content moderation
-// Version: 1.0.0
+// Version: 2.0.0 - Now uses word-boundary matching to prevent false positives
 
 export const DISALLOWED_TERMS = [
   // Common profanity
@@ -26,22 +26,30 @@ export function normalizeText(text: string): string {
     .replace(/7/g, 't')
     .replace(/\$/g, 's')
     .replace(/@/g, 'a')
-    // Remove special characters for word boundary detection
+    // Replace common username separators with spaces for word boundary detection
+    .replace(/[_-]/g, ' ')
+    // Remove other special characters
     .replace(/[^a-z0-9\s]/g, '');
 }
 
-// Check if text contains any disallowed terms
+// Escape special regex characters
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Check if text contains any disallowed terms using word boundaries
 export function containsDisallowedTerm(text: string): boolean {
   const normalized = normalizeText(text);
-  const words = normalized.split(/\s+/);
   
   for (const term of DISALLOWED_TERMS) {
-    // Check for exact word match
-    if (words.includes(term)) {
-      return true;
-    }
-    // Check for term as substring (catches variations)
-    if (normalized.includes(term)) {
+    // Normalize the term the same way
+    const normalizedTerm = normalizeText(term);
+    
+    // Create a regex with word boundaries
+    // \b matches word boundaries (transition between \w and \W)
+    const regex = new RegExp(`\\b${escapeRegex(normalizedTerm)}\\b`, 'i');
+    
+    if (regex.test(normalized)) {
       return true;
     }
   }

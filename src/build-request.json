@@ -1,83 +1,74 @@
 {
   "kind": "build_request",
-  "title": "Prevent the same student from liking the same post multiple times",
-  "priority": "normal",
+  "title": "Fix bootstrap connectivity error by surfacing actor initialization failures and improving retries",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Enforce a one-like-per-student-per-post rule in the backend so the same authenticated caller cannot successfully like the same post more than once.",
-      "target": "backend",
+      "text": "Update the actor initialization hook so that failures to create the backend actor are surfaced to the app (instead of leaving the actor as null), including exposing an Error object and loading/error flags to consumers.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-4"
         ],
         "quotes": [
-          "Make it so that the same student cannot like the same post multiple times."
+          "Error: Unable to connect to the service. Please check your connection and try again. Fix this"
         ]
       },
       "acceptanceCriteria": [
-        "Given a post, when the same authenticated principal calls likePost(postId) twice, the post’s like count increases by at most 1 total.",
-        "The backend stores per-post like ownership (who liked) so the rule is enforced even if the user refreshes or retries.",
-        "The backend returns a deterministic error message when a duplicate like is attempted (e.g., contains the phrase \"already liked\")."
+        "When backend actor creation fails (e.g., agent/canister unreachable), the hook exposes a non-null error state (not just actor=null).",
+        "The error object contains the original failure message (or a sanitized, more specific message) so the UI can display something more accurate than a generic connection error.",
+        "No changes are made to any files under frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (compose behavior elsewhere if needed)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the frontend post-like UI to gracefully handle a duplicate-like attempt by showing an English user-facing message instead of failing silently.",
+      "text": "Fix the app bootstrap/profile-loading flow so it does not throw the generic \"Unable to connect to the service\" error solely because the actor is null while an actor initialization error already exists; instead, show the real initialization error (or timeout) in the existing BootstrapErrorScreen.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-4"
         ],
         "quotes": [
-          "Make it so that the same student cannot like the same post multiple times."
+          "Error: Unable to connect to the service. Please check your connection and try again. Fix this"
         ]
       },
       "acceptanceCriteria": [
-        "When a user taps Like on the same post more than once and the backend rejects it, the UI shows a toast (or equivalent) stating the user has already liked the post.",
-        "The Like button returns to a non-loading state after the duplicate-like attempt completes.",
-        "Non-duplicate errors during post like show a generic English error message (e.g., \"Failed to like post. Please try again.\")."
+        "If actor initialization fails, the bootstrap error screen displays an appropriate user-facing message (e.g., timed out / unable to reach service) and the Technical details section includes the underlying error message.",
+        "If actor initialization is still in progress, the app stays in a loading state until either actor initialization succeeds or a defined timeout occurs.",
+        "The specific user-facing text \"Unable to connect to the service. Please check your connection and try again.\" is only shown when it is the best available diagnosis (e.g., offline/unreachable), not as a catch-all for any actor-null state."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "If existing persisted post data must be upgraded, add/extend conditional migration logic so existing posts initialize the new per-post liked-by tracking without breaking getPosts or likePost.",
-      "target": "backend",
+      "text": "Make the Retry action on the bootstrap error screen reliably recover from transient connection/agent issues by forcing a fresh actor initialization and then re-running the profile fetch without requiring a full page reload.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-4"
         ],
         "quotes": [
-          "Make it so that the same student cannot like the same post multiple times."
+          "Error: Unable to connect to the service. Please check your connection and try again. Fix this"
         ]
       },
       "acceptanceCriteria": [
-        "After upgrade/migration, existing posts remain readable via getPosts.",
-        "After upgrade/migration, likePost works for posts created before the upgrade and still enforces one-like-per-student-per-post."
+        "Clicking Try Again triggers a new actor initialization attempt (not blocked by cached query state) and then refetches the caller profile.",
+        "If the service becomes available, the user successfully reaches the app without seeing the error screen again.",
+        "If the service is still unavailable, the error screen remains and the technical details reflect the most recent failure attempt."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo.",
-    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui."
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Backend must remain single-actor; do not introduce additional canisters/services."
   ],
   "nonGoals": [
-    "Add an \"unlike\" feature or toggle-like behavior for posts.",
-    "Change the existing comment-like behavior beyond what is necessary to keep it working.",
-    "Display per-user liked state (e.g., filled heart) for posts unless already available without adding new backend fields to PostView."
+    "Adding new authentication methods (only Internet Identity is supported).",
+    "Adding real-time/WebSocket connectivity checks.",
+    "Changing weekly poll functionality or unrelated feed/profile features."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

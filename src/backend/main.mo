@@ -1,7 +1,6 @@
 import Map "mo:core/Map";
 import Array "mo:core/Array";
 import Nat "mo:core/Nat";
-import Int "mo:core/Int";
 import Time "mo:core/Time";
 import List "mo:core/List";
 import Order "mo:core/Order";
@@ -12,10 +11,7 @@ import AccessControl "authorization/access-control";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import Set "mo:core/Set";
-import Migration "migration";
 
-// Integrate migration module for data persistence
-(with migration = Migration.run)
 actor {
   // Integrate storage and authentication modules
   include MixinStorage();
@@ -26,13 +22,11 @@ actor {
 
   public type UserProfile = {
     name : Text;
-    accountSuspendedUntil : ?Time.Time; // New field for tracking suspension
+    accountSuspendedUntil : ?Time.Time;
   };
 
-  // Store user profiles persistently
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  // Enforce unique usernames
   public shared ({ caller }) func setUniqueUsername(username : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can set username");
@@ -63,6 +57,9 @@ actor {
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
     userProfiles.get(user);
   };
 
@@ -104,7 +101,7 @@ actor {
     likes : Nat;
     comments : [Comment];
     reported : Bool;
-    likedBy : Set.Set<Principal>; // Track who liked each post.
+    likedBy : Set.Set<Principal>;
   };
 
   type PostView = {
@@ -268,7 +265,6 @@ actor {
               likedBy = post.likedBy;
             };
 
-            // Update posts array by constructing a new array
             let updatedPostsArray = postsArray.toVarArray<Post>();
             updatedPostsArray[idx] := updatedPost;
 
@@ -372,7 +368,6 @@ actor {
     postsWithFilteredComments;
   };
 
-  // Only allow one like per user per post.
   public shared ({ caller }) func likePost(postId : Nat) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can like posts");
@@ -380,7 +375,7 @@ actor {
 
     let updateLikeStatus = func(post : Post, caller : Principal) : Post {
       if (post.likedBy.contains(caller)) {
-        post; // No change if caller already liked
+        post;
       } else {
         let newLikedBy = post.likedBy.clone();
         newLikedBy.add(caller);
@@ -409,7 +404,7 @@ actor {
 
     let updateCommentLikes = func(comment : Comment, caller : Principal) : Comment {
       if (comment.likedBy.contains(caller)) {
-        comment; // No change if caller has already liked
+        comment;
       } else {
         let newLikedBy = comment.likedBy.clone();
         newLikedBy.add(caller);

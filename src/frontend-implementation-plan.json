@@ -1,21 +1,78 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Handle duplicate post likes gracefully in the UI",
+  "title": "Surface actor initialization failures and improve bootstrap retry reliability",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Show a user-facing message when the backend rejects a duplicate post-like, and ensure the Like button exits loading state.",
+      "id": "REQ-1",
+      "summary": "Expose backend actor initialization failures via a new wrapper hook that provides error/loading flags and preserves the underlying error message.",
       "acceptanceCriteria": [
-        "When a user taps Like on the same post more than once and the backend rejects it, the UI shows a toast (or equivalent) stating the user has already liked the post.",
-        "The Like button returns to a non-loading state after the duplicate-like attempt completes.",
-        "Non-duplicate errors during post like show a generic English error message (e.g., \"Failed to like post. Please try again.\")."
+        "When backend actor creation fails (e.g., agent/canister unreachable), the hook exposes a non-null error state (not just actor=null).",
+        "The error object contains the original failure message (or a sanitized, more specific message) so the UI can display something more accurate than a generic connection error.",
+        "No changes are made to any files under frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (compose behavior elsewhere if needed)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/feed/PostCard.tsx",
+          "path": "frontend/src/hooks/useActorStatus.ts",
+          "operation": "create",
+          "description": "Create a new hook that composes the immutable useActor() output with React Query cache state for the actor query to expose: actor, isLoading (initializing), isError, error (actor initialization failure), and a helper to force a fresh initialization by removing/resetting the cached actor query. Ensure returned error preserves the underlying failure message (sanitized if needed)."
+        },
+        {
+          "path": "frontend/src/utils/actorInitError.ts",
+          "operation": "create",
+          "description": "Add a small utility to normalize/sanitize actor initialization errors into a consistent Error shape (including retaining the original message for technical details) and to classify common connectivity/timeouts vs other failures."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Adjust bootstrap/profile-loading flow to wait for actor initialization, prefer actor init errors over generic actor-null errors, and surface accurate messaging in the existing BootstrapErrorScreen.",
+      "acceptanceCriteria": [
+        "If actor initialization fails, the bootstrap error screen displays an appropriate user-facing message (e.g., timed out / unable to reach service) and the Technical details section includes the underlying error message.",
+        "If actor initialization is still in progress, the app stays in a loading state until either actor initialization succeeds or a defined timeout occurs.",
+        "The specific user-facing text \"Unable to connect to the service. Please check your connection and try again.\" is only shown when it is the best available diagnosis (e.g., offline/unreachable), not as a catch-all for any actor-null state."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update the post Like handler to use an awaited mutation (e.g., mutateAsync) with try/catch and show toast feedback using the existing Sonner toast system: if the caught error message contains \"already liked\" (or similar duplicate-like indicator), show an English message like \"You have already liked this post.\"; otherwise show a generic message like \"Failed to like post. Please try again.\" Ensure the Like button is re-enabled after completion (success or error) by relying on mutation pending state and/or an explicit local loading flag."
+          "description": "Update useGetCallerUserProfile() to use the new useActorStatus hook so it no longer throws a generic connection error solely because actor is null. Keep the query disabled while actor initialization is in progress; if actor initialization fails, surface that error (or a derived timeout) instead. Ensure the hook’s returned loading/error flags reflect actor initialization vs profile fetch accurately."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Refine bootstrap gating so the app remains in a loading state while actor initialization is still in progress (via useGetCallerUserProfile’s improved loading semantics) and only shows BootstrapErrorScreen when there is a real actor init failure, actor-init timeout, or profile fetch failure. Ensure watchdog timeout behavior does not mask an existing actor initialization error."
+        },
+        {
+          "path": "frontend/src/components/auth/BootstrapErrorScreen.tsx",
+          "operation": "modify",
+          "description": "Improve error classification and message selection so the generic text \"Unable to connect to the service. Please check your internet connection and try again.\" is only used for best-fit connectivity diagnoses. Expand technical details rendering to include underlying cause/most specific message produced by actor initialization error normalization."
+        },
+        {
+          "path": "frontend/src/utils/bootDiagnostics.ts",
+          "operation": "modify",
+          "description": "Add (or adjust) boot phase recording for actor initialization start/success/failure and timeout, so BootstrapErrorScreen technical details reflect whether the failure occurred during actor init vs profile fetch."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Make the BootstrapErrorScreen retry action force a fresh actor initialization and then re-run profile fetch without a full page reload, updating technical details for each attempt.",
+      "acceptanceCriteria": [
+        "Clicking Try Again triggers a new actor initialization attempt (not blocked by cached query state) and then refetches the caller profile.",
+        "If the service becomes available, the user successfully reaches the app without seeing the error screen again.",
+        "If the service is still unavailable, the error screen remains and the technical details reflect the most recent failure attempt."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Update the existing retry handlers (watchdog timeout and error state) to force a fresh actor initialization by removing/resetting the cached actor query (not just invalidating), then refetching actor-dependent queries and finally refetching the caller profile. Ensure boot diagnostics are reset/recorded per attempt so technical details reflect the latest failure."
+        },
+        {
+          "path": "frontend/src/hooks/useActorStatus.ts",
+          "operation": "modify",
+          "description": "Ensure the hook exposes a stable \"retry\" helper (or equivalent) that performs a cache reset/removal for the actor query and triggers a fresh initialization attempt, enabling UI flows (like bootstrap retry) to reliably recover from transient agent/connectivity issues."
         }
       ]
     }

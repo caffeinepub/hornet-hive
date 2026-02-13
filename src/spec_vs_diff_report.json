@@ -1,77 +1,30 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T15:27:27.341Z",
-  "summary": "Diff adds per-post likedBy tracking types and a migration module, and updates the PostCard UI to toast on duplicate-like errors. However, the backend likePost enforcement and deterministic duplicate-like error message are not evidenced in the provided diff summary (backend/main.mo is truncated before likePost). The diff also appears to introduce several unrelated backend/frontend features (profiles, moderation, notifications, polls, suspension) that were not requested.",
+  "generatedAt": "2026-02-13T09:43:58.556Z",
+  "summary": "Implemented a new wrapper hook (useActorStatus) to surface actor initialization loading/error state and normalized error details, and updated bootstrap/profile query flow to prefer actor-init errors and add a watchdog timeout. However, the diff summary does not show a complete/explicit implementation of the BootstrapErrorScreen Retry action that forces fresh actor initialization and then refetches the caller profile.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Enforce a one-like-per-student-per-post rule in the backend so the same authenticated caller cannot successfully like the same post more than once, and return a deterministic error message containing the phrase \"already liked\" on duplicate like attempts.",
-      "reason": "The diff shows the new `likedBy` field added to `Post` and a migration module, but the likePost implementation and its duplicate-like rejection/error message are not present in the visible (truncated) backend/main.mo excerpt, so enforcement and the deterministic error text cannot be verified from this summary.",
+      "id": "REQ-3",
+      "requirement": "Make the Retry action on the bootstrap error screen reliably recover by forcing a fresh actor initialization and then re-running the profile fetch without a full reload.",
+      "reason": "Although useActorStatus exposes retryActorInit() that removes/refetches the actor query, the provided diff summary does not show the Retry button being wired to (1) call retryActorInit and (2) refetch/invalidate the caller profile query so that profile loading is re-attempted after actor recovery. App.tsx is truncated before showing the BootstrapErrorScreen onRetry implementation, and useGetCallerUserProfile does not add any explicit 'retry' helper that coordinates actor re-init + profile refetch.",
       "evidence": [
-        "backend/main.mo (truncated; shows Post has likedBy but no likePost implementation visible)",
-        "backend/migration.mo (adds likedBy initialization but does not enforce like rules)"
+        "frontend/src/hooks/useActorStatus.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/App.tsx (truncated)",
+        "frontend/src/components/auth/BootstrapErrorScreen.tsx (onRetry prop only; no logic shown)"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "Backend user profile management (setUniqueUsername, getCallerUserProfile, getUserProfile, saveCallerUserProfile) and accountSuspendedUntil field.",
-      "reason": "Not requested by the BuildRequest, which only targets preventing duplicate post likes and related migration/UI error handling.",
-      "evidence": [
-        "backend/main.mo (truncated; shows UserProfile, setUniqueUsername, getCallerUserProfile, getUserProfile, saveCallerUserProfile)"
-      ]
-    },
-    {
-      "description": "Frontend bootstrap watchdog / endless spinner prevention and retry/reset logic in the app shell.",
-      "reason": "Not requested by REQ-1/2/3 and unrelated to duplicate post-like handling.",
-      "evidence": [
-        "frontend-file-summaries.txt (\"frontend/src/App.tsx\": bootstrap watchdog, error screen after 12 seconds, retry logic)"
-      ]
-    },
-    {
-      "description": "Suspension-status hook and UI behavior tied to user suspensions.",
-      "reason": "BuildRequest does not mention account suspensions or disabling posting/commenting based on suspension state.",
-      "evidence": [
-        "frontend-file-summaries.txt (\"frontend/src/hooks/useSuspensionStatus.ts\": suspension derived state used to disable UI)"
-      ]
-    },
-    {
-      "description": "Content/username moderation features (disallowed terms list, validateUsername, validateTextContent).",
-      "reason": "Not part of the requested like-duplication prevention work.",
-      "evidence": [
-        "frontend-file-summaries.txt (\"frontend/src/moderation/disallowedTerms.ts\", \"frontend/src/moderation/validateUsername.ts\", \"frontend/src/moderation/validateTextContent.ts\")"
-      ]
-    },
-    {
-      "description": "Image upload validation/constants (allowed MIME types, max file size, imageFileValidation utility).",
-      "reason": "Not requested for the duplicate-like feature.",
-      "evidence": [
-        "frontend-file-summaries.txt (\"frontend/src/constants/uploads.ts\", \"frontend/src/utils/imageFileValidation.ts\")"
-      ]
-    },
-    {
-      "description": "Notification system types and LocalStorage-backed notification persistence.",
-      "reason": "Not requested by the BuildRequest.",
-      "evidence": [
-        "frontend-file-summaries.txt (\"frontend/src/notifications/notificationTypes.ts\", \"frontend/src/notifications/localNotificationsStore.ts\")"
-      ]
-    },
-    {
-      "description": "Local poll system (time windows, topic extraction, local poll store).",
-      "reason": "Not requested by the BuildRequest.",
-      "evidence": [
-        "frontend-file-summaries.txt (\"frontend/src/polls/pollTimeWindow.ts\", \"frontend/src/polls/extractWeeklyTopics.ts\", \"frontend/src/polls/localPollStore.ts\")"
-      ]
-    }
-  ],
-  "confidence": 0.63,
+  "hallucinated_features": [],
+  "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/feed/PostCard.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/auth/BootstrapErrorScreen.tsx",
+    "frontend/src/hooks/useActorStatus.ts",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/utils/actorInitError.ts",
     "project_state.json"
   ]
 }

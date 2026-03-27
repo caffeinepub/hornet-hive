@@ -1,32 +1,34 @@
-import { useState } from 'react';
-import type { PostView } from '../../backend';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { Heart, Send, Trash2, Flag } from 'lucide-react';
-import { formatTimestamp } from '../../utils/timeFormat';
-import { useAddComment, useLikeComment } from '../../hooks/useQueries';
-import { useSuspensionStatus } from '../../hooks/useSuspensionStatus';
-import { validateTextContent } from '../../moderation/validateTextContent';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { formatSuspensionEnd } from '../../utils/timeFormat';
-import { useInternetIdentity } from '../../hooks/useInternetIdentity';
-import DeleteCommentDialog from './DeleteCommentDialog';
-import ReportCommentDialog from '../reporting/ReportCommentDialog';
-import { toast } from 'sonner';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Flag, Heart, Send, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { PostView } from "../../backend";
+import { useInternetIdentity } from "../../hooks/useInternetIdentity";
+import { useAddComment, useLikeComment } from "../../hooks/useQueries";
+import { useSuspensionStatus } from "../../hooks/useSuspensionStatus";
+import { validateTextContent } from "../../moderation/validateTextContent";
+import { formatTimestamp } from "../../utils/timeFormat";
+import { formatSuspensionEnd } from "../../utils/timeFormat";
+import ReportCommentDialog from "../reporting/ReportCommentDialog";
+import DeleteCommentDialog from "./DeleteCommentDialog";
 
 interface CommentsThreadProps {
   post: PostView;
 }
 
 export default function CommentsThread({ post }: CommentsThreadProps) {
-  const [commentText, setCommentText] = useState('');
+  const [commentText, setCommentText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [selectedCommentId, setSelectedCommentId] = useState<bigint | null>(null);
+  const [selectedCommentId, setSelectedCommentId] = useState<bigint | null>(
+    null,
+  );
   const [likingCommentId, setLikingCommentId] = useState<bigint | null>(null);
-  
+
   const addCommentMutation = useAddComment();
   const likeCommentMutation = useLikeComment();
   const { isSuspended, suspensionEnd } = useSuspensionStatus();
@@ -37,21 +39,26 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
     setError(null);
 
     if (isSuspended) {
-      setError(`Your account is suspended until ${formatSuspensionEnd(suspensionEnd!)}`);
+      setError(
+        `Your account is suspended until ${formatSuspensionEnd(suspensionEnd!)}`,
+      );
       return;
     }
 
     const validation = validateTextContent(commentText);
     if (!validation.valid) {
-      setError(validation.error || 'Invalid comment');
+      setError(validation.error || "Invalid comment");
       return;
     }
 
     try {
-      await addCommentMutation.mutateAsync({ postId: post.id, content: commentText });
-      setCommentText('');
+      await addCommentMutation.mutateAsync({
+        postId: post.id,
+        content: commentText,
+      });
+      setCommentText("");
     } catch (err: any) {
-      setError(err.message || 'Failed to post comment');
+      setError(err.message || "Failed to post comment");
     }
   };
 
@@ -61,11 +68,14 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
       await likeCommentMutation.mutateAsync({ postId: post.id, commentId });
     } catch (err: any) {
       // Map backend error to user-friendly message
-      const errorMessage = err.message || '';
-      if (errorMessage.includes('already liked') || errorMessage.includes('duplicate')) {
-        toast.error('You have already liked this comment.');
+      const errorMessage = err.message || "";
+      if (
+        errorMessage.includes("already liked") ||
+        errorMessage.includes("duplicate")
+      ) {
+        toast.error("You have already liked this comment.");
       } else {
-        toast.error('Failed to like comment. Please try again.');
+        toast.error("Failed to like comment. Please try again.");
       }
     } finally {
       setLikingCommentId(null);
@@ -97,7 +107,9 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
           <div key={Number(comment.id)} className="flex gap-3">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm">{comment.authorName}</span>
+                <span className="font-semibold text-sm">
+                  {comment.authorName}
+                </span>
                 <span className="text-xs text-muted-foreground">
                   {formatTimestamp(comment.timestamp)}
                 </span>
@@ -144,14 +156,20 @@ export default function CommentsThread({ post }: CommentsThreadProps) {
         <Input
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
-          placeholder={isSuspended ? 'You are suspended from commenting' : 'Add a comment...'}
+          placeholder={
+            isSuspended
+              ? "You are suspended from commenting"
+              : "Add a comment..."
+          }
           disabled={addCommentMutation.isPending || isSuspended}
           className="flex-1"
         />
         <Button
           type="submit"
           size="icon"
-          disabled={addCommentMutation.isPending || !commentText.trim() || isSuspended}
+          disabled={
+            addCommentMutation.isPending || !commentText.trim() || isSuspended
+          }
         >
           <Send className="h-4 w-4" />
         </Button>

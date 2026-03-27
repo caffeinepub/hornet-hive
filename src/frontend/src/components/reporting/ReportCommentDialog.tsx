@@ -1,7 +1,3 @@
-import { useState } from 'react';
-import { useReportComment } from '../../hooks/useQueries';
-import { useInternetIdentity } from '../../hooks/useInternetIdentity';
-import { addNotification } from '../../notifications/localNotificationsStore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,8 +7,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useInternetIdentity } from "../../hooks/useInternetIdentity";
+import { useReportComment } from "../../hooks/useQueries";
+import { addNotification } from "../../notifications/localNotificationsStore";
 
 interface ReportCommentDialogProps {
   open: boolean;
@@ -21,11 +21,11 @@ interface ReportCommentDialogProps {
   commentId: bigint;
 }
 
-export default function ReportCommentDialog({ 
-  open, 
-  onOpenChange, 
-  postId, 
-  commentId 
+export default function ReportCommentDialog({
+  open,
+  onOpenChange,
+  postId,
+  commentId,
 }: ReportCommentDialogProps) {
   const { identity } = useInternetIdentity();
   const reportCommentMutation = useReportComment();
@@ -37,18 +37,18 @@ export default function ReportCommentDialog({
     setIsSubmitting(true);
     try {
       await reportCommentMutation.mutateAsync({ postId, commentId });
-      
+
       // Add local notification for reporter
       addNotification(
         identity.getPrincipal().toString(),
-        'report_submitted',
-        'Your report has been submitted. The comment has been removed from the feed.'
+        "report_submitted",
+        "Your report has been submitted. The comment has been removed from the feed.",
       );
-      
-      toast.success('Comment reported successfully');
+
+      toast.success("Comment reported successfully");
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to report comment');
+      toast.error(error.message || "Failed to report comment");
     } finally {
       setIsSubmitting(false);
     }
@@ -60,14 +60,15 @@ export default function ReportCommentDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Report this comment?</AlertDialogTitle>
           <AlertDialogDescription>
-            This comment will be removed from the feed immediately. The author will be notified anonymously
-            that their comment was reported. Your identity will not be revealed.
+            This comment will be removed from the feed immediately. The author
+            will be notified anonymously that their comment was reported. Your
+            identity will not be revealed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleConfirm} disabled={isSubmitting}>
-            {isSubmitting ? 'Reporting...' : 'Report Comment'}
+            {isSubmitting ? "Reporting..." : "Report Comment"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

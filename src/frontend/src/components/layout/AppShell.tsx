@@ -1,14 +1,14 @@
-import { ReactNode } from 'react';
-import { Bell, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import BottomNav from '../nav/BottomNav';
-import { useInternetIdentity } from '../../hooks/useInternetIdentity';
-import { getUnreadCount } from '../../notifications/localNotificationsStore';
-import { shareHornetHive } from '../../utils/shareHornetHive';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Bell, Share2 } from "lucide-react";
+import type { ReactNode } from "react";
+import { toast } from "sonner";
+import { useInternetIdentity } from "../../hooks/useInternetIdentity";
+import { getUnreadCount } from "../../notifications/localNotificationsStore";
+import { shareHornetHive } from "../../utils/shareHornetHive";
+import BottomNav from "../nav/BottomNav";
 
-type Page = 'feed' | 'create' | 'notifications' | 'polls' | 'profile';
+type Page = "feed" | "create" | "notifications" | "polls" | "profile";
 
 interface AppShellProps {
   children: ReactNode;
@@ -16,21 +16,30 @@ interface AppShellProps {
   onNavigate: (page: Page) => void;
 }
 
-export default function AppShell({ children, currentPage, onNavigate }: AppShellProps) {
+export default function AppShell({
+  children,
+  currentPage,
+  onNavigate,
+}: AppShellProps) {
   const { identity } = useInternetIdentity();
-  const unreadCount = identity ? getUnreadCount(identity.getPrincipal().toString()) : 0;
+  const unreadCount = identity
+    ? getUnreadCount(identity.getPrincipal().toString())
+    : 0;
 
   const handleShare = async () => {
     const result = await shareHornetHive();
-    
+
     // Show success toast only for clipboard/legacy fallback
-    if (result.success && (result.method === 'clipboard' || result.method === 'legacy')) {
-      toast.success('Link copied to clipboard!');
+    if (
+      result.success &&
+      (result.method === "clipboard" || result.method === "legacy")
+    ) {
+      toast.success("Link copied to clipboard!");
     }
-    
+
     // Don't show error toast if user cancelled the native share sheet
-    if (!result.success && result.error !== 'Share cancelled') {
-      toast.error('Failed to share. Please try again.');
+    if (!result.success && result.error !== "Share cancelled") {
+      toast.error("Failed to share. Please try again.");
     }
   };
 
@@ -63,7 +72,7 @@ export default function AppShell({ children, currentPage, onNavigate }: AppShell
               size="icon"
               className="relative"
               aria-label="Notifications"
-              onClick={() => onNavigate('notifications')}
+              onClick={() => onNavigate("notifications")}
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
@@ -71,7 +80,7 @@ export default function AppShell({ children, currentPage, onNavigate }: AppShell
                   variant="destructive"
                   className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 >
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </Badge>
               )}
             </Button>

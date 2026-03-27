@@ -1,31 +1,36 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActorStatus } from './useActorStatus';
-import type { PostView, UserProfile } from '../backend';
-import { ExternalBlob } from '../backend';
-import { Principal } from '@dfinity/principal';
-import { withTimeout } from '../utils/withTimeout';
+import type { Principal } from "@dfinity/principal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { PostView, UserProfile } from "../backend";
+import type { ExternalBlob } from "../backend";
+import { withTimeout } from "../utils/withTimeout";
+import { useActorStatus } from "./useActorStatus";
 
 export function useGetCallerUserProfile() {
-  const { actor, isLoading: actorLoading, isError: actorError, error: actorErrorDetails } = useActorStatus();
+  const {
+    actor,
+    isLoading: actorLoading,
+    isError: actorError,
+    error: actorErrorDetails,
+  } = useActorStatus();
 
   const query = useQuery<UserProfile | null>({
-    queryKey: ['currentUserProfile'],
+    queryKey: ["currentUserProfile"],
     queryFn: async () => {
       if (!actor) {
-        throw new Error('Actor not available');
+        throw new Error("Actor not available");
       }
       // Wrap the actor call with a timeout
       return withTimeout(
         actor.getCallerUserProfile(),
         10000,
-        'Profile fetch timed out. Please try again.'
+        "Profile fetch timed out. Please try again.",
       );
     },
     // Only enable when actor is available and not in error state
     enabled: !!actor && !actorLoading && !actorError,
     retry: (failureCount, error) => {
       // Don't retry timeout errors
-      if (error.message.includes('timed out')) {
+      if (error.message.includes("timed out")) {
         return false;
       }
       return failureCount < 2;
@@ -34,9 +39,10 @@ export function useGetCallerUserProfile() {
   });
 
   // If actor initialization failed, surface that error instead of profile fetch error
-  const effectiveError = actorError && actorErrorDetails 
-    ? new Error(actorErrorDetails.message)
-    : query.error;
+  const effectiveError =
+    actorError && actorErrorDetails
+      ? new Error(actorErrorDetails.message)
+      : query.error;
 
   const effectiveIsError = actorError || query.isError;
 
@@ -56,7 +62,7 @@ export function useGetUserProfile(userPrincipal: Principal | null) {
   const { actor, isLoading: actorLoading } = useActorStatus();
 
   return useQuery<UserProfile | null>({
-    queryKey: ['userProfile', userPrincipal?.toString()],
+    queryKey: ["userProfile", userPrincipal?.toString()],
     queryFn: async () => {
       if (!actor || !userPrincipal) return null;
       return actor.getUserProfile(userPrincipal);
@@ -71,11 +77,11 @@ export function useSetUniqueUsername() {
 
   return useMutation({
     mutationFn: async (username: string) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       await actor.setUniqueUsername(username);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
     },
   });
 }
@@ -84,7 +90,7 @@ export function useGetPosts() {
   const { actor, isLoading: actorLoading } = useActorStatus();
 
   return useQuery<PostView[]>({
-    queryKey: ['posts'],
+    queryKey: ["posts"],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getPosts();
@@ -99,12 +105,15 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ content, image }: { content: string; image: ExternalBlob | null }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      content,
+      image,
+    }: { content: string; image: ExternalBlob | null }) => {
+      if (!actor) throw new Error("Actor not available");
       await actor.createPost(content, image);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 }
@@ -115,11 +124,11 @@ export function useDeletePost() {
 
   return useMutation({
     mutationFn: async (postId: bigint) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       await actor.deletePost(postId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 }
@@ -129,12 +138,15 @@ export function useDeleteComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ postId, commentId }: { postId: bigint; commentId: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      postId,
+      commentId,
+    }: { postId: bigint; commentId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
       await actor.deleteComment(postId, commentId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 }
@@ -145,11 +157,11 @@ export function useLikePost() {
 
   return useMutation({
     mutationFn: async (postId: bigint) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       await actor.likePost(postId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
     // Don't invalidate on error - let the component handle it
     onError: () => {
@@ -163,12 +175,15 @@ export function useAddComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ postId, content }: { postId: bigint; content: string }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      postId,
+      content,
+    }: { postId: bigint; content: string }) => {
+      if (!actor) throw new Error("Actor not available");
       await actor.addComment(postId, content);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 }
@@ -178,12 +193,15 @@ export function useLikeComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ postId, commentId }: { postId: bigint; commentId: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      postId,
+      commentId,
+    }: { postId: bigint; commentId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
       await actor.likeComment(postId, commentId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
     // Don't invalidate on error - let the component handle it
     onError: () => {
@@ -198,11 +216,11 @@ export function useReportPost() {
 
   return useMutation({
     mutationFn: async (postId: bigint) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       await actor.reportPost(postId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 }
@@ -212,12 +230,15 @@ export function useReportComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ postId, commentId }: { postId: bigint; commentId: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
+    mutationFn: async ({
+      postId,
+      commentId,
+    }: { postId: bigint; commentId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
       await actor.reportComment(postId, commentId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 }
@@ -227,7 +248,7 @@ export function useReportUser() {
 
   return useMutation({
     mutationFn: async (reportedUser: Principal) => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) throw new Error("Actor not available");
       await actor.reportUser(reportedUser);
     },
   });

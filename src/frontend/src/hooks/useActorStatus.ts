@@ -8,14 +8,17 @@
  * - retryActorInit: function to force a fresh initialization attempt
  */
 
-import { useActor } from './useActor';
-import { useQueryClient } from '@tanstack/react-query';
-import { useInternetIdentity } from './useInternetIdentity';
-import { normalizeActorError, type NormalizedActorError } from '../utils/actorInitError';
-import { useMemo } from 'react';
+import { useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import {
+  type NormalizedActorError,
+  normalizeActorError,
+} from "../utils/actorInitError";
+import { useActor } from "./useActor";
+import { useInternetIdentity } from "./useInternetIdentity";
 
 export interface ActorStatus {
-  actor: ReturnType<typeof useActor>['actor'];
+  actor: ReturnType<typeof useActor>["actor"];
   isLoading: boolean;
   isError: boolean;
   error: NormalizedActorError | null;
@@ -28,11 +31,11 @@ export function useActorStatus(): ActorStatus {
   const queryClient = useQueryClient();
 
   // Get the actor query state from the cache
-  const actorQueryKey = ['actor', identity?.getPrincipal().toString()];
+  const actorQueryKey = ["actor", identity?.getPrincipal().toString()];
   const actorQueryState = queryClient.getQueryState(actorQueryKey);
 
   // Determine if there's an error
-  const isError = actorQueryState?.status === 'error';
+  const isError = actorQueryState?.status === "error";
   const rawError = actorQueryState?.error;
 
   // Normalize the error

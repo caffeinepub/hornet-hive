@@ -32,15 +32,15 @@ class BootDiagnostics {
 
   getSummary(): string {
     if (this.phases.length === 0) {
-      return 'No boot phases recorded';
+      return "No boot phases recorded";
     }
 
     const lastPhase = this.phases[this.phases.length - 1];
-    const failedPhases = this.phases.filter(p => !p.success);
+    const failedPhases = this.phases.filter((p) => !p.success);
 
     if (failedPhases.length > 0) {
       const lastFailure = failedPhases[failedPhases.length - 1];
-      return `Failed at ${lastFailure.phase} (${lastFailure.timestamp}ms): ${lastFailure.error || 'Unknown error'}`;
+      return `Failed at ${lastFailure.phase} (${lastFailure.timestamp}ms): ${lastFailure.error || "Unknown error"}`;
     }
 
     return `Completed ${this.phases.length} phases in ${Date.now() - this.startTime}ms. Last: ${lastPhase.phase}`;

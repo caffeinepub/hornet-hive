@@ -1,8 +1,8 @@
-import { useGetPosts } from '../hooks/useQueries';
-import PostCard from '../components/feed/PostCard';
-import WeeklyPollPanel from '../components/polls/WeeklyPollPanel';
-import { Loader2, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import { Loader2, RefreshCw } from "lucide-react";
+import PostCard from "../components/feed/PostCard";
+import WeeklyPollPanel from "../components/polls/WeeklyPollPanel";
+import { useGetPosts } from "../hooks/useQueries";
 
 export default function FeedPage() {
   const { data: posts, isLoading, refetch, isFetching } = useGetPosts();
@@ -15,6 +15,10 @@ export default function FeedPage() {
     );
   }
 
+  const sortedPosts = posts
+    ? [...posts].sort((a, b) => Number(b.timestamp) - Number(a.timestamp))
+    : [];
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -25,19 +29,23 @@ export default function FeedPage() {
           onClick={() => refetch()}
           disabled={isFetching}
         >
-          <RefreshCw className={`h-5 w-5 ${isFetching ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-5 w-5 ${isFetching ? "animate-spin" : ""}`}
+          />
         </Button>
       </div>
 
       <WeeklyPollPanel compact />
 
-      {posts && posts.length === 0 ? (
+      {sortedPosts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No posts yet. Be the first to share!</p>
+          <p className="text-muted-foreground">
+            No posts yet. Be the first to share!
+          </p>
         </div>
       ) : (
         <div>
-          {posts?.map((post) => (
+          {sortedPosts.map((post) => (
             <PostCard key={Number(post.id)} post={post} />
           ))}
         </div>

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { useDeleteComment } from '../../hooks/useQueries';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,8 +7,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useDeleteComment } from "../../hooks/useQueries";
 
 interface DeleteCommentDialogProps {
   open: boolean;
@@ -19,11 +19,11 @@ interface DeleteCommentDialogProps {
   commentId: bigint;
 }
 
-export default function DeleteCommentDialog({ 
-  open, 
-  onOpenChange, 
-  postId, 
-  commentId 
+export default function DeleteCommentDialog({
+  open,
+  onOpenChange,
+  postId,
+  commentId,
 }: DeleteCommentDialogProps) {
   const deleteCommentMutation = useDeleteComment();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,10 +32,10 @@ export default function DeleteCommentDialog({
     setIsSubmitting(true);
     try {
       await deleteCommentMutation.mutateAsync({ postId, commentId });
-      toast.success('Comment deleted successfully');
+      toast.success("Comment deleted successfully");
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete comment');
+      toast.error(error.message || "Failed to delete comment");
     } finally {
       setIsSubmitting(false);
     }
@@ -47,13 +47,14 @@ export default function DeleteCommentDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this comment?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. Your comment will be permanently removed.
+            This action cannot be undone. Your comment will be permanently
+            removed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleConfirm} disabled={isSubmitting}>
-            {isSubmitting ? 'Deleting...' : 'Delete'}
+            {isSubmitting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

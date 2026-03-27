@@ -5,14 +5,14 @@
 
 export interface ShareResult {
   success: boolean;
-  method: 'webshare' | 'clipboard' | 'legacy' | 'none';
+  method: "webshare" | "clipboard" | "legacy" | "none";
   error?: string;
 }
 
 const SHARE_DATA = {
-  title: 'Hornet Hive',
-  text: 'Join me on Hornet Hive - a safe space for Eureka students to connect and share!',
-  url: typeof window !== 'undefined' ? window.location.origin : '',
+  title: "Hornet Hive",
+  text: "Join me on Hornet Hive - a safe space for Eureka students to connect and share!",
+  url: typeof window !== "undefined" ? window.location.origin : "",
 };
 
 /**
@@ -20,18 +20,26 @@ const SHARE_DATA = {
  */
 async function tryWebShare(): Promise<ShareResult> {
   if (!navigator.share) {
-    return { success: false, method: 'none', error: 'Web Share API not supported' };
+    return {
+      success: false,
+      method: "none",
+      error: "Web Share API not supported",
+    };
   }
 
   try {
     await navigator.share(SHARE_DATA);
-    return { success: true, method: 'webshare' };
+    return { success: true, method: "webshare" };
   } catch (error: any) {
     // User cancelled the share dialog
-    if (error.name === 'AbortError') {
-      return { success: false, method: 'webshare', error: 'Share cancelled' };
+    if (error.name === "AbortError") {
+      return { success: false, method: "webshare", error: "Share cancelled" };
     }
-    return { success: false, method: 'webshare', error: error.message || 'Share failed' };
+    return {
+      success: false,
+      method: "webshare",
+      error: error.message || "Share failed",
+    };
   }
 }
 
@@ -40,14 +48,22 @@ async function tryWebShare(): Promise<ShareResult> {
  */
 async function tryClipboardAPI(): Promise<ShareResult> {
   if (!navigator.clipboard || !navigator.clipboard.writeText) {
-    return { success: false, method: 'none', error: 'Clipboard API not supported' };
+    return {
+      success: false,
+      method: "none",
+      error: "Clipboard API not supported",
+    };
   }
 
   try {
     await navigator.clipboard.writeText(SHARE_DATA.url);
-    return { success: true, method: 'clipboard' };
+    return { success: true, method: "clipboard" };
   } catch (error: any) {
-    return { success: false, method: 'clipboard', error: error.message || 'Clipboard write failed' };
+    return {
+      success: false,
+      method: "clipboard",
+      error: error.message || "Clipboard write failed",
+    };
   }
 }
 
@@ -56,22 +72,26 @@ async function tryClipboardAPI(): Promise<ShareResult> {
  */
 function tryLegacyCopy(): ShareResult {
   try {
-    const textarea = document.createElement('textarea');
+    const textarea = document.createElement("textarea");
     textarea.value = SHARE_DATA.url;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
     document.body.appendChild(textarea);
     textarea.select();
-    
-    const success = document.execCommand('copy');
+
+    const success = document.execCommand("copy");
     document.body.removeChild(textarea);
-    
+
     if (success) {
-      return { success: true, method: 'legacy' };
+      return { success: true, method: "legacy" };
     }
-    return { success: false, method: 'legacy', error: 'Copy command failed' };
+    return { success: false, method: "legacy", error: "Copy command failed" };
   } catch (error: any) {
-    return { success: false, method: 'legacy', error: error.message || 'Legacy copy failed' };
+    return {
+      success: false,
+      method: "legacy",
+      error: error.message || "Legacy copy failed",
+    };
   }
 }
 
@@ -81,7 +101,7 @@ function tryLegacyCopy(): ShareResult {
 export async function shareHornetHive(): Promise<ShareResult> {
   // Try Web Share API first
   const webShareResult = await tryWebShare();
-  if (webShareResult.success || webShareResult.error === 'Share cancelled') {
+  if (webShareResult.success || webShareResult.error === "Share cancelled") {
     return webShareResult;
   }
 
@@ -113,5 +133,5 @@ export async function copyLinkToClipboard(): Promise<ShareResult> {
  * Check if Web Share API is available
  */
 export function isWebShareSupported(): boolean {
-  return typeof navigator !== 'undefined' && !!navigator.share;
+  return typeof navigator !== "undefined" && !!navigator.share;
 }

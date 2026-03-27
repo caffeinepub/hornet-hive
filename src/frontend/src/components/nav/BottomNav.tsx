@@ -1,7 +1,7 @@
-import { Home, PlusCircle, Bell, BarChart3, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import { BarChart3, Bell, Home, PlusCircle, User } from "lucide-react";
 
-type Page = 'feed' | 'create' | 'notifications' | 'polls' | 'profile';
+type Page = "feed" | "create" | "notifications" | "polls" | "profile";
 
 interface BottomNavProps {
   currentPage: Page;
@@ -10,10 +10,10 @@ interface BottomNavProps {
 
 export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
   const navItems = [
-    { page: 'feed' as Page, icon: Home, label: 'Feed' },
-    { page: 'create' as Page, icon: PlusCircle, label: 'Post' },
-    { page: 'polls' as Page, icon: BarChart3, label: 'Polls' },
-    { page: 'profile' as Page, icon: User, label: 'Profile' },
+    { page: "feed" as Page, icon: Home, label: "Feed" },
+    { page: "create" as Page, icon: PlusCircle, label: "Post" },
+    { page: "polls" as Page, icon: BarChart3, label: "Polls" },
+    { page: "profile" as Page, icon: User, label: "Profile" },
   ];
 
   return (
@@ -23,7 +23,7 @@ export default function BottomNav({ currentPage, onNavigate }: BottomNavProps) {
           {navItems.map(({ page, icon: Icon, label }) => (
             <Button
               key={page}
-              variant={currentPage === page ? 'default' : 'ghost'}
+              variant={currentPage === page ? "default" : "ghost"}
               size="sm"
               className="flex-col h-14 gap-1"
               onClick={() => onNavigate(page)}

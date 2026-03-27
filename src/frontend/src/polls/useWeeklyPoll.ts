@@ -1,11 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetPosts } from '../hooks/useQueries';
-import { getPollState, getCurrentWeekId, isInCurrentWeek } from './pollTimeWindow';
-import { getCurrentPoll, createPoll, votePoll, PostOption } from './localPollStore';
-import { addNotification } from '../notifications/localNotificationsStore';
-import { toast } from 'sonner';
-import type { PostView } from '../backend';
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import type { PostView } from "../backend";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useGetPosts } from "../hooks/useQueries";
+import { addNotification } from "../notifications/localNotificationsStore";
+import {
+  type PostOption,
+  createPoll,
+  getCurrentPoll,
+  votePoll,
+} from "./localPollStore";
+import {
+  getCurrentWeekId,
+  getPollState,
+  isInCurrentWeek,
+} from "./pollTimeWindow";
 
 export interface WeeklyPoll {
   weekId: string;
@@ -17,9 +26,9 @@ export interface WeeklyPoll {
 
 export function useWeeklyPoll() {
   const { identity } = useInternetIdentity();
-  const { data: posts, isLoading: postsLoading } = useGetPosts();
+  const { data: posts } = useGetPosts();
   const [poll, setPoll] = useState<WeeklyPoll | null>(
-    identity ? getCurrentPoll(identity.getPrincipal().toString()) : null
+    identity ? getCurrentPoll(identity.getPrincipal().toString()) : null,
   );
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const pollState = getPollState();
@@ -31,19 +40,24 @@ export function useWeeklyPoll() {
     let currentPoll = getCurrentPoll(principalId);
 
     // Only create poll on Friday or later (not Mon-Thu)
-    if (!currentPoll && pollState !== 'not_available') {
+    if (!currentPoll && pollState !== "not_available") {
       // Filter posts to only those from the current week
-      const weekPosts = posts?.filter(post => isInCurrentWeek(post.timestamp)) || [];
-      
+      const weekPosts =
+        posts?.filter((post) => isInCurrentWeek(post.timestamp)) || [];
+
       // Generate top 5 post options from current week's posts
       const postOptions = generateTop5PostOptions(weekPosts);
-      
+
       // Create poll even with 0 post options (allows "Other" voting)
       currentPoll = createPoll(principalId, postOptions);
-      
+
       // Notify user that poll is available (only on Friday)
-      if (pollState === 'voting_open') {
-        addNotification(principalId, 'poll_available', 'This week\'s poll is now available! Vote for the most engaging post.');
+      if (pollState === "voting_open") {
+        addNotification(
+          principalId,
+          "poll_available",
+          "This week's poll is now available! Vote for the most engaging post.",
+        );
       }
     }
 
@@ -55,19 +69,21 @@ export function useWeeklyPoll() {
 
     const result = votePoll(identity.getPrincipal().toString(), optionId);
     if (result.success) {
-      toast.success('Vote submitted successfully!');
+      toast.success("Vote submitted successfully!");
       setPoll(getCurrentPoll(identity.getPrincipal().toString()));
       setSelectedOption(null);
     } else {
-      toast.error(result.error || 'Failed to submit vote');
+      toast.error(result.error || "Failed to submit vote");
     }
   };
 
-  const totalVotes = poll ? Object.values(poll.votes).reduce((sum, count) => sum + count, 0) : 0;
-  const canVote = pollState === 'voting_open' && poll && !poll.userVote;
-  
+  const totalVotes = poll
+    ? Object.values(poll.votes).reduce((sum, count) => sum + count, 0)
+    : 0;
+  const canVote = pollState === "voting_open" && poll && !poll.userVote;
+
   // Show results on Saturday/Sunday, or if user has already voted (but not immediately on Friday after voting)
-  const showResults = pollState === 'results_visible' && poll;
+  const showResults = pollState === "results_visible" && poll;
 
   return {
     poll,
@@ -78,7 +94,6 @@ export function useWeeklyPoll() {
     totalVotes,
     canVote,
     showResults,
-    postsLoading,
   };
 }
 
@@ -92,7 +107,7 @@ function generateTop5PostOptions(posts: PostView[]): PostOption[] {
     return [];
   }
 
-  const postsWithEngagement = posts.map(post => ({
+  const postsWithEngagement = posts.map((post) => ({
     post,
     engagement: Number(post.likes) + post.comments.length,
   }));
@@ -121,5 +136,5 @@ function truncateContent(content: string, maxLength: number): string {
   if (content.length <= maxLength) {
     return content;
   }
-  return content.substring(0, maxLength).trim() + '...';
+  return `${content.substring(0, maxLength).trim()}...`;
 }

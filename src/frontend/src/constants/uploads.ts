@@ -1,9 +1,9 @@
 // Allowed image MIME types
 export const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp',
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
 ];
 
 // Maximum file size: 5MB

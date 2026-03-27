@@ -1,6 +1,7 @@
-import React, { Component, ReactNode } from 'react';
-import { safeLogError } from '@/utils/safeErrorLogging';
-import AppErrorFallbackScreen from './AppErrorFallbackScreen';
+import { safeLogError } from "@/utils/safeErrorLogging";
+import type React from "react";
+import { Component, type ReactNode } from "react";
+import AppErrorFallbackScreen from "./AppErrorFallbackScreen";
 
 interface Props {
   children: ReactNode;
@@ -39,7 +40,7 @@ export default class AppErrorBoundary extends Component<Props, State> {
     // Handle null componentStack by converting to undefined
     const componentStack = errorInfo.componentStack ?? undefined;
     safeLogError(error, componentStack);
-    
+
     // Store error info in state for display
     this.setState({
       errorInfo,

@@ -1,4 +1,4 @@
-import { useGetCallerUserProfile } from './useQueries';
+import { useGetCallerUserProfile } from "./useQueries";
 
 export function useSuspensionStatus() {
   const { data: profile } = useGetCallerUserProfile();

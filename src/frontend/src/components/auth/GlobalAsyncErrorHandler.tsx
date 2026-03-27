@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import AppErrorFallbackScreen from './AppErrorFallbackScreen';
+import { useEffect, useState } from "react";
+import AppErrorFallbackScreen from "./AppErrorFallbackScreen";
 
 interface GlobalAsyncErrorHandlerProps {
   children: React.ReactNode;
@@ -9,31 +9,34 @@ interface GlobalAsyncErrorHandlerProps {
  * Catches uncaught async errors and unhandled promise rejections
  * that would otherwise result in a blank screen.
  */
-export default function GlobalAsyncErrorHandler({ children }: GlobalAsyncErrorHandlerProps) {
+export default function GlobalAsyncErrorHandler({
+  children,
+}: GlobalAsyncErrorHandlerProps) {
   const [asyncError, setAsyncError] = useState<Error | null>(null);
 
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      console.error('Uncaught error:', event.error);
+      console.error("Uncaught error:", event.error);
       setAsyncError(event.error || new Error(event.message));
       event.preventDefault();
     };
 
     const handleRejection = (event: PromiseRejectionEvent) => {
-      console.error('Unhandled promise rejection:', event.reason);
-      const error = event.reason instanceof Error 
-        ? event.reason 
-        : new Error(String(event.reason));
+      console.error("Unhandled promise rejection:", event.reason);
+      const error =
+        event.reason instanceof Error
+          ? event.reason
+          : new Error(String(event.reason));
       setAsyncError(error);
       event.preventDefault();
     };
 
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleRejection);
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleRejection);
 
     return () => {
-      window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleRejection);
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleRejection);
     };
   }, []);
 

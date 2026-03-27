@@ -1,29 +1,41 @@
-import { useInternetIdentity } from './hooks/useInternetIdentity';
-import { useGetCallerUserProfile } from './hooks/useQueries';
-import { useActorStatus } from './hooks/useActorStatus';
-import { useState, useEffect, useRef } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import LoginScreen from './components/auth/LoginScreen';
-import UsernameSetupModal from './components/profile/UsernameSetupModal';
-import BootstrapErrorScreen from './components/auth/BootstrapErrorScreen';
-import AppErrorBoundary from './components/auth/AppErrorBoundary';
-import GlobalAsyncErrorHandler from './components/auth/GlobalAsyncErrorHandler';
-import AppShell from './components/layout/AppShell';
-import FeedPage from './pages/FeedPage';
-import CreatePostPage from './pages/CreatePostPage';
-import NotificationsPage from './pages/NotificationsPage';
-import PollsPage from './pages/PollsPage';
-import ProfilePage from './pages/ProfilePage';
-import { Toaster } from '@/components/ui/sonner';
-import { bootDiagnostics } from './utils/bootDiagnostics';
+import { Toaster } from "@/components/ui/sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import AppErrorBoundary from "./components/auth/AppErrorBoundary";
+import BootstrapErrorScreen from "./components/auth/BootstrapErrorScreen";
+import GlobalAsyncErrorHandler from "./components/auth/GlobalAsyncErrorHandler";
+import LoginScreen from "./components/auth/LoginScreen";
+import AppShell from "./components/layout/AppShell";
+import UsernameSetupModal from "./components/profile/UsernameSetupModal";
+import { useActorStatus } from "./hooks/useActorStatus";
+import { useInternetIdentity } from "./hooks/useInternetIdentity";
+import { useGetCallerUserProfile } from "./hooks/useQueries";
+import CreatePostPage from "./pages/CreatePostPage";
+import FeedPage from "./pages/FeedPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import PollsPage from "./pages/PollsPage";
+import ProfilePage from "./pages/ProfilePage";
+import { bootDiagnostics } from "./utils/bootDiagnostics";
 
-type Page = 'feed' | 'create' | 'notifications' | 'polls' | 'profile';
+type Page = "feed" | "create" | "notifications" | "polls" | "profile";
 
 function AppContent() {
   const { identity, clear, isInitializing } = useInternetIdentity();
-  const { isLoading: actorLoading, isError: actorError, error: actorErrorDetails, retryActorInit } = useActorStatus();
-  const { data: userProfile, isLoading: profileLoading, isFetched, isError: profileError, error: profileErrorDetails, refetch } = useGetCallerUserProfile();
-  const [currentPage, setCurrentPage] = useState<Page>('feed');
+  const {
+    isLoading: actorLoading,
+    isError: actorError,
+    error: actorErrorDetails,
+    retryActorInit,
+  } = useActorStatus();
+  const {
+    data: userProfile,
+    isLoading: profileLoading,
+    isFetched,
+    isError: profileError,
+    error: profileErrorDetails,
+    refetch,
+  } = useGetCallerUserProfile();
+  const [currentPage, setCurrentPage] = useState<Page>("feed");
   const [watchdogTimeout, setWatchdogTimeout] = useState(false);
   const watchdogTimerRef = useRef<NodeJS.Timeout | null>(null);
   const queryClient = useQueryClient();
@@ -33,31 +45,46 @@ function AppContent() {
   // Record boot phases for diagnostics
   useEffect(() => {
     if (isInitializing) {
-      bootDiagnostics.recordPhase('auth-initializing', true);
+      bootDiagnostics.recordPhase("auth-initializing", true);
     } else if (isAuthenticated) {
-      bootDiagnostics.recordPhase('auth-complete', true);
+      bootDiagnostics.recordPhase("auth-complete", true);
     }
   }, [isInitializing, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated && actorLoading) {
-      bootDiagnostics.recordPhase('actor-initializing', true);
+      bootDiagnostics.recordPhase("actor-initializing", true);
     } else if (isAuthenticated && actorError) {
-      bootDiagnostics.recordPhase('actor-init-failed', false, actorErrorDetails?.technicalDetails || 'Unknown actor error');
+      bootDiagnostics.recordPhase(
+        "actor-init-failed",
+        false,
+        actorErrorDetails?.technicalDetails || "Unknown actor error",
+      );
     } else if (isAuthenticated && !actorLoading && !actorError) {
-      bootDiagnostics.recordPhase('actor-ready', true);
+      bootDiagnostics.recordPhase("actor-ready", true);
     }
   }, [isAuthenticated, actorLoading, actorError, actorErrorDetails]);
 
   useEffect(() => {
     if (isAuthenticated && profileLoading) {
-      bootDiagnostics.recordPhase('profile-loading', true);
+      bootDiagnostics.recordPhase("profile-loading", true);
     } else if (isAuthenticated && isFetched && !profileError) {
-      bootDiagnostics.recordPhase('profile-loaded', true, userProfile ? 'Profile exists' : 'No profile');
+      bootDiagnostics.recordPhase(
+        "profile-loaded",
+        true,
+        userProfile ? "Profile exists" : "No profile",
+      );
     } else if (profileError && profileErrorDetails) {
-      bootDiagnostics.recordPhase('profile-error', false, profileErrorDetails);
+      bootDiagnostics.recordPhase("profile-error", false, profileErrorDetails);
     }
-  }, [isAuthenticated, profileLoading, isFetched, profileError, profileErrorDetails, userProfile]);
+  }, [
+    isAuthenticated,
+    profileLoading,
+    isFetched,
+    profileError,
+    profileErrorDetails,
+    userProfile,
+  ]);
 
   // App-level bootstrap watchdog for authenticated users
   useEffect(() => {
@@ -73,7 +100,11 @@ function AppContent() {
     if (isAuthenticated && isLoading && !hasError) {
       // Start watchdog timer - if loading persists beyond this, show error
       watchdogTimerRef.current = setTimeout(() => {
-        bootDiagnostics.recordPhase('watchdog-timeout', false, 'Bootstrap exceeded 15s timeout');
+        bootDiagnostics.recordPhase(
+          "watchdog-timeout",
+          false,
+          "Bootstrap exceeded 15s timeout",
+        );
         setWatchdogTimeout(true);
       }, 15000); // 15 second watchdog
     } else {
@@ -87,7 +118,14 @@ function AppContent() {
         watchdogTimerRef.current = null;
       }
     };
-  }, [isAuthenticated, actorLoading, profileLoading, isFetched, actorError, profileError]);
+  }, [
+    isAuthenticated,
+    actorLoading,
+    profileLoading,
+    isFetched,
+    actorError,
+    profileError,
+  ]);
 
   // Show login screen if not authenticated
   if (!isAuthenticated) {
@@ -105,7 +143,7 @@ function AppContent() {
       }
       // Reset diagnostics
       bootDiagnostics.reset();
-      bootDiagnostics.recordPhase('retry-initiated', true);
+      bootDiagnostics.recordPhase("retry-initiated", true);
       // Force fresh actor initialization
       await retryActorInit();
       // Refetch profile
@@ -118,7 +156,9 @@ function AppContent() {
       bootDiagnostics.reset();
     };
 
-    const watchdogError = new Error('The app is taking longer than expected to start. Please try again.');
+    const watchdogError = new Error(
+      "The app is taking longer than expected to start. Please try again.",
+    );
 
     return (
       <>
@@ -134,11 +174,12 @@ function AppContent() {
 
   // Handle error state - prefer actor error over profile error
   const hasError = actorError || profileError;
-  const effectiveError = actorError && actorErrorDetails 
-    ? new Error(actorErrorDetails.message)
-    : profileError && profileErrorDetails
-    ? profileErrorDetails
-    : null;
+  const effectiveError =
+    actorError && actorErrorDetails
+      ? new Error(actorErrorDetails.message)
+      : profileError && profileErrorDetails
+        ? profileErrorDetails
+        : null;
 
   if (hasError && effectiveError) {
     const handleRetry = async () => {
@@ -150,7 +191,7 @@ function AppContent() {
       }
       // Reset diagnostics
       bootDiagnostics.reset();
-      bootDiagnostics.recordPhase('retry-initiated', true);
+      bootDiagnostics.recordPhase("retry-initiated", true);
       // Force fresh actor initialization
       await retryActorInit();
       // Refetch profile
@@ -176,7 +217,13 @@ function AppContent() {
   }
 
   // Show username setup modal if authenticated but no profile
-  const showProfileSetup = isAuthenticated && !actorLoading && !profileLoading && isFetched && userProfile === null && !hasError;
+  const showProfileSetup =
+    isAuthenticated &&
+    !actorLoading &&
+    !profileLoading &&
+    isFetched &&
+    userProfile === null &&
+    !hasError;
 
   if (showProfileSetup) {
     return (
@@ -194,7 +241,7 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -202,16 +249,18 @@ function AppContent() {
   }
 
   // Bootstrap complete - record success
-  bootDiagnostics.recordPhase('app-ready', true);
+  bootDiagnostics.recordPhase("app-ready", true);
 
   return (
     <>
       <AppShell currentPage={currentPage} onNavigate={setCurrentPage}>
-        {currentPage === 'feed' && <FeedPage />}
-        {currentPage === 'create' && <CreatePostPage onSuccess={() => setCurrentPage('feed')} />}
-        {currentPage === 'notifications' && <NotificationsPage />}
-        {currentPage === 'polls' && <PollsPage />}
-        {currentPage === 'profile' && <ProfilePage />}
+        {currentPage === "feed" && <FeedPage />}
+        {currentPage === "create" && (
+          <CreatePostPage onSuccess={() => setCurrentPage("feed")} />
+        )}
+        {currentPage === "notifications" && <NotificationsPage />}
+        {currentPage === "polls" && <PollsPage />}
+        {currentPage === "profile" && <ProfilePage />}
       </AppShell>
       <Toaster />
     </>

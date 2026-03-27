@@ -1,25 +1,25 @@
-import { useState } from 'react';
-import { useCreatePost } from '../hooks/useQueries';
-import { useSuspensionStatus } from '../hooks/useSuspensionStatus';
-import { validateTextContent } from '../moderation/validateTextContent';
-import { validateImageFile } from '../utils/imageFileValidation';
-import { ExternalBlob } from '../backend';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Image, Loader2, X } from 'lucide-react';
-import { formatSuspensionEnd } from '../utils/timeFormat';
-import { toast } from 'sonner';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Image, Loader2, X } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { ExternalBlob } from "../backend";
+import { useCreatePost } from "../hooks/useQueries";
+import { useSuspensionStatus } from "../hooks/useSuspensionStatus";
+import { validateTextContent } from "../moderation/validateTextContent";
+import { validateImageFile } from "../utils/imageFileValidation";
+import { formatSuspensionEnd } from "../utils/timeFormat";
 
 interface CreatePostPageProps {
   onSuccess: () => void;
 }
 
 export default function CreatePostPage({ onSuccess }: CreatePostPageProps) {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -33,7 +33,7 @@ export default function CreatePostPage({ onSuccess }: CreatePostPageProps) {
 
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      setError(validation.error || 'Invalid file');
+      setError(validation.error || "Invalid file");
       return;
     }
 
@@ -59,13 +59,15 @@ export default function CreatePostPage({ onSuccess }: CreatePostPageProps) {
     setError(null);
 
     if (isSuspended) {
-      setError(`Your account is suspended until ${formatSuspensionEnd(suspensionEnd!)}`);
+      setError(
+        `Your account is suspended until ${formatSuspensionEnd(suspensionEnd!)}`,
+      );
       return;
     }
 
     const validation = validateTextContent(content);
     if (!validation.valid) {
-      setError(validation.error || 'Invalid content');
+      setError(validation.error || "Invalid content");
       return;
     }
 
@@ -75,16 +77,18 @@ export default function CreatePostPage({ onSuccess }: CreatePostPageProps) {
       if (selectedFile) {
         const arrayBuffer = await selectedFile.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
-        imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-          setUploadProgress(percentage);
-        });
+        imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress(
+          (percentage) => {
+            setUploadProgress(percentage);
+          },
+        );
       }
 
       await createPostMutation.mutateAsync({ content, image: imageBlob });
-      toast.success('Post created successfully!');
+      toast.success("Post created successfully!");
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Failed to create post');
+      setError(err.message || "Failed to create post");
     }
   };
 
@@ -94,7 +98,9 @@ export default function CreatePostPage({ onSuccess }: CreatePostPageProps) {
         <h2 className="text-2xl font-bold">Create Post</h2>
         <Alert variant="destructive">
           <AlertDescription>
-            Your account is suspended until {formatSuspensionEnd(suspensionEnd!)}. You cannot create posts during this time.
+            Your account is suspended until{" "}
+            {formatSuspensionEnd(suspensionEnd!)}. You cannot create posts
+            during this time.
           </AlertDescription>
         </Alert>
       </div>
@@ -138,7 +144,7 @@ export default function CreatePostPage({ onSuccess }: CreatePostPageProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => document.getElementById('image')?.click()}
+                    onClick={() => document.getElementById("image")?.click()}
                   >
                     <Image className="mr-2 h-4 w-4" />
                     Choose Image
@@ -189,7 +195,7 @@ export default function CreatePostPage({ onSuccess }: CreatePostPageProps) {
                   Posting...
                 </>
               ) : (
-                'Post to Hive'
+                "Post to Hive"
               )}
             </Button>
           </form>

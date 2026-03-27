@@ -1,15 +1,19 @@
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
-import { useSuspensionStatus } from '../hooks/useSuspensionStatus';
-import { useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { User, LogOut, AlertTriangle, Share2, Copy } from 'lucide-react';
-import { formatSuspensionEnd } from '../utils/timeFormat';
-import { shareHornetHive, copyLinkToClipboard, isWebShareSupported } from '../utils/shareHornetHive';
-import { toast } from 'sonner';
-import { useState } from 'react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Copy, LogOut, Share2, User } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useGetCallerUserProfile } from "../hooks/useQueries";
+import { useSuspensionStatus } from "../hooks/useSuspensionStatus";
+import {
+  copyLinkToClipboard,
+  isWebShareSupported,
+  shareHornetHive,
+} from "../utils/shareHornetHive";
+import { formatSuspensionEnd } from "../utils/timeFormat";
 
 export default function ProfilePage() {
   const { identity, clear } = useInternetIdentity();
@@ -27,22 +31,22 @@ export default function ProfilePage() {
     setIsSharing(true);
     try {
       const result = await shareHornetHive();
-      
+
       if (result.success) {
-        if (result.method === 'webshare') {
+        if (result.method === "webshare") {
           // Web Share API succeeded - no toast needed as native UI was shown
         } else {
           // Clipboard methods succeeded
-          toast.success('Link copied to clipboard!');
+          toast.success("Link copied to clipboard!");
         }
       } else {
         // Only show error if it wasn't a user cancellation
-        if (result.error !== 'Share cancelled') {
-          toast.error('Could not share link');
+        if (result.error !== "Share cancelled") {
+          toast.error("Could not share link");
         }
       }
-    } catch (error) {
-      toast.error('Could not share link');
+    } catch (_error) {
+      toast.error("Could not share link");
     } finally {
       setIsSharing(false);
     }
@@ -52,14 +56,14 @@ export default function ProfilePage() {
     setIsSharing(true);
     try {
       const result = await copyLinkToClipboard();
-      
+
       if (result.success) {
-        toast.success('Link copied to clipboard!');
+        toast.success("Link copied to clipboard!");
       } else {
-        toast.error('Could not copy link');
+        toast.error("Could not copy link");
       }
-    } catch (error) {
-      toast.error('Could not copy link');
+    } catch (_error) {
+      toast.error("Could not copy link");
     } finally {
       setIsSharing(false);
     }
@@ -75,7 +79,9 @@ export default function ProfilePage() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Your account is suspended until {formatSuspensionEnd(suspensionEnd!)}. You cannot post or comment during this time.
+            Your account is suspended until{" "}
+            {formatSuspensionEnd(suspensionEnd!)}. You cannot post or comment
+            during this time.
           </AlertDescription>
         </Alert>
       )}
@@ -98,7 +104,9 @@ export default function ProfilePage() {
           {identity && (
             <div className="pt-4 border-t">
               <p className="text-xs text-muted-foreground mb-1">Principal ID</p>
-              <p className="text-xs font-mono break-all">{identity.getPrincipal().toString()}</p>
+              <p className="text-xs font-mono break-all">
+                {identity.getPrincipal().toString()}
+              </p>
             </div>
           )}
         </CardContent>
@@ -110,7 +118,8 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Invite your friends to join Hornet Hive and connect with the Eureka community!
+            Invite your friends to join Hornet Hive and connect with the Eureka
+            community!
           </p>
           <div className="flex gap-2">
             {webShareSupported ? (
@@ -151,20 +160,18 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
-            Hornet Hive is a safe space for Eureka students to connect, share, and discuss what matters to them.
+            Hornet Hive is a safe space for Eureka students to connect, share,
+            and discuss what matters to them.
           </p>
           <p>
-            Remember to keep all posts and comments appropriate and respectful. Inappropriate content will be removed,
-            and repeated violations may result in account suspension.
+            Remember to keep all posts and comments appropriate and respectful.
+            Inappropriate content will be removed, and repeated violations may
+            result in account suspension.
           </p>
         </CardContent>
       </Card>
 
-      <Button
-        variant="destructive"
-        className="w-full"
-        onClick={handleLogout}
-      >
+      <Button variant="destructive" className="w-full" onClick={handleLogout}>
         <LogOut className="mr-2 h-4 w-4" />
         Sign Out
       </Button>
@@ -172,7 +179,7 @@ export default function ProfilePage() {
       <footer className="text-center text-sm text-muted-foreground pt-8 pb-4">
         <p>© {new Date().getFullYear()} Hornet Hive</p>
         <p className="mt-2">
-          Built with ❤️ using{' '}
+          Built with ❤️ using{" "}
           <a
             href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
             target="_blank"

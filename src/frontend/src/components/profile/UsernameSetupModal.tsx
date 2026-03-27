@@ -1,20 +1,29 @@
-import { useState } from 'react';
-import { useSetUniqueUsername } from '../../hooks/useQueries';
-import { validateUsername } from '../../moderation/validateUsername';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useSetUniqueUsername } from "../../hooks/useQueries";
+import { validateUsername } from "../../moderation/validateUsername";
 
 interface UsernameSetupModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function UsernameSetupModal({ open, onOpenChange }: UsernameSetupModalProps) {
-  const [username, setUsername] = useState('');
+export default function UsernameSetupModal({
+  open,
+  onOpenChange,
+}: UsernameSetupModalProps) {
+  const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const setUsernameMutation = useSetUniqueUsername();
 
@@ -25,7 +34,7 @@ export default function UsernameSetupModal({ open, onOpenChange }: UsernameSetup
     // Validate username
     const validation = validateUsername(username);
     if (!validation.valid) {
-      setError(validation.error || 'Invalid username');
+      setError(validation.error || "Invalid username");
       return;
     }
 
@@ -33,17 +42,23 @@ export default function UsernameSetupModal({ open, onOpenChange }: UsernameSetup
       await setUsernameMutation.mutateAsync(username);
       onOpenChange(false);
     } catch (err: any) {
-      setError(err.message || 'Failed to set username. It may already be taken.');
+      setError(
+        err.message || "Failed to set username. It may already be taken.",
+      );
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-md"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Choose Your Username</DialogTitle>
           <DialogDescription>
-            This is how other students will see you in the Hornet Hive. Choose wisely!
+            This is how other students will see you in the Hornet Hive. Choose
+            wisely!
           </DialogDescription>
         </DialogHeader>
 
@@ -80,7 +95,7 @@ export default function UsernameSetupModal({ open, onOpenChange }: UsernameSetup
                 Setting username...
               </>
             ) : (
-              'Continue'
+              "Continue"
             )}
           </Button>
         </form>

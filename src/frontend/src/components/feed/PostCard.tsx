@@ -1,17 +1,22 @@
-import { useState } from 'react';
-import type { PostView } from '../../backend';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Heart, MessageCircle, MoreVertical, Flag, Trash2 } from 'lucide-react';
-import { formatTimestamp } from '../../utils/timeFormat';
-import { useLikePost } from '../../hooks/useQueries';
-import { useInternetIdentity } from '../../hooks/useInternetIdentity';
-import CommentsThread from './CommentsThread';
-import ReportPostDialog from '../reporting/ReportPostDialog';
-import ReportAccountDialog from '../reporting/ReportAccountDialog';
-import DeletePostDialog from './DeletePostDialog';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Flag, Heart, MessageCircle, MoreVertical, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { PostView } from "../../backend";
+import { useInternetIdentity } from "../../hooks/useInternetIdentity";
+import { useLikePost } from "../../hooks/useQueries";
+import { formatTimestamp } from "../../utils/timeFormat";
+import ReportAccountDialog from "../reporting/ReportAccountDialog";
+import ReportPostDialog from "../reporting/ReportPostDialog";
+import CommentsThread from "./CommentsThread";
+import DeletePostDialog from "./DeletePostDialog";
 
 interface PostCardProps {
   post: PostView;
@@ -26,7 +31,8 @@ export default function PostCard({ post }: PostCardProps) {
   const [isLiking, setIsLiking] = useState(false);
   const likePostMutation = useLikePost();
 
-  const isOwnPost = identity?.getPrincipal().toString() === post.authorId.toString();
+  const isOwnPost =
+    identity?.getPrincipal().toString() === post.authorId.toString();
 
   const handleLike = async () => {
     setIsLiking(true);
@@ -34,12 +40,12 @@ export default function PostCard({ post }: PostCardProps) {
       await likePostMutation.mutateAsync(post.id);
     } catch (error: any) {
       const errorMessage = error?.message || String(error);
-      
+
       // Check if this is a duplicate like error
-      if (errorMessage.toLowerCase().includes('already liked')) {
-        toast.error('You have already liked this post.');
+      if (errorMessage.toLowerCase().includes("already liked")) {
+        toast.error("You have already liked this post.");
       } else {
-        toast.error('Failed to like post. Please try again.');
+        toast.error("Failed to like post. Please try again.");
       }
     } finally {
       setIsLiking(false);
@@ -53,9 +59,11 @@ export default function PostCard({ post }: PostCardProps) {
           <div className="flex items-start justify-between">
             <div>
               <p className="font-semibold text-foreground">{post.authorName}</p>
-              <p className="text-sm text-muted-foreground">{formatTimestamp(post.timestamp)}</p>
+              <p className="text-sm text-muted-foreground">
+                {formatTimestamp(post.timestamp)}
+              </p>
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -74,7 +82,9 @@ export default function PostCard({ post }: PostCardProps) {
                       <Flag className="mr-2 h-4 w-4" />
                       Report Post
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowReportAccount(true)}>
+                    <DropdownMenuItem
+                      onClick={() => setShowReportAccount(true)}
+                    >
                       <Flag className="mr-2 h-4 w-4" />
                       Report Account
                     </DropdownMenuItem>
@@ -94,13 +104,14 @@ export default function PostCard({ post }: PostCardProps) {
             <div className="rounded-lg overflow-hidden bg-muted">
               <img
                 src={post.image.getDirectURL()}
-                alt="Post image"
+                alt="Post content"
                 className="w-full h-auto"
                 onError={(e) => {
-                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.style.display = "none";
                   const parent = e.currentTarget.parentElement;
                   if (parent) {
-                    parent.innerHTML = '<div class="p-8 text-center text-muted-foreground">Image unavailable</div>';
+                    parent.innerHTML =
+                      '<div class="p-8 text-center text-muted-foreground">Image unavailable</div>';
                   }
                 }}
               />

@@ -1,10 +1,10 @@
-import { useInternetIdentity } from '../../hooks/useInternetIdentity';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useInternetIdentity } from "../../hooks/useInternetIdentity";
 
 export default function LoginScreen() {
   const { login, loginStatus } = useInternetIdentity();
-  const isLoggingIn = loginStatus === 'logging-in';
+  const isLoggingIn = loginStatus === "logging-in";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted flex flex-col items-center justify-center p-4">
@@ -36,10 +36,10 @@ export default function LoginScreen() {
                 Signing in...
               </>
             ) : (
-              'Sign in to continue'
+              "Sign in to continue"
             )}
           </Button>
-          
+
           <p className="text-sm text-muted-foreground">
             A safe space for Eureka students to connect and share
           </p>
